@@ -1,0 +1,213 @@
+{% extends "base.html" %}
+{% block title %}Tanya Dokumen — Local RAG{% endblock %}
+
+{% block content %}
+<header class="page-header">
+  <div>
+    <h1>Tanya Dokumen</h1>
+    <p class="page-subtitle">Ajukan pertanyaan berbasis dokumen yang sudah di-index sistem AI.</p>
+  </div>
+</header>
+
+<div class="layout-split">
+  <!-- ============ LEFT: Q&A ============ -->
+  <section class="panel panel-primary">
+    <div class="panel-header">
+      <h2 style="display:flex;align-items:center;gap:9px;">
+        <span style="display:flex;align-items:center;justify-content:center;width:32px;height:32px;background:linear-gradient(135deg,#3b82f6,#8b5cf6);border-radius:8px;flex-shrink:0;">
+          <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="white" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        </span>
+        Pertanyaan
+      </h2>
+    </div>
+
+    <div class="query-form">
+      <textarea
+        id="queryInput"
+        rows="4"
+        placeholder="Contoh: Berapa total anggaran proyek tahun ini? Atau: Apa kesimpulan dari laporan Q3?"
+        class="query-textarea"
+        style="border-radius:12px;"></textarea>
+
+      <div class="query-actions">
+        <input type="hidden" id="topK" value="5">
+        <p class="hint-text" style="margin:0;">
+          Tekan <kbd>Ctrl</kbd> + <kbd>Enter</kbd> untuk submit cepat
+        </p>
+        <button class="btn btn-primary btn-pill" id="btnQuery">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+          <span>Tanya AI</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- LOADING STATE -->
+    <div id="queryLoading" class="loading-state hidden">
+      <div class="pulse-dots"><span></span><span></span><span></span></div>
+      <p class="loading-text" id="loadingText">Memproses pertanyaan...</p>
+      <p class="muted small" style="margin-top:6px;">Pipeline: search → conflict → LLM → hallucination check</p>
+    </div>
+
+    <!-- RESULT -->
+    <div id="queryResult" class="hidden">
+      <!-- Answer -->
+      <div class="answer-section">
+        <div class="section-label">Jawaban AI</div>
+        <div class="answer-box" id="answerText"></div>
+      </div>
+
+      <!-- Metrics -->
+      <div class="metrics-grid">
+        <!-- Confidence -->
+        <div class="metric-card">
+          <div class="metric-label">Confidence</div>
+          <div class="metric-value">
+            <div class="confidence-ring-wrap">
+              <!-- SVG gradient definition -->
+              <svg width="0" height="0" style="position:absolute;">
+                <defs>
+                  <linearGradient id="ringGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stop-color="#3b82f6"/>
+                    <stop offset="100%" stop-color="#8b5cf6"/>
+                  </linearGradient>
+                </defs>
+              </svg>
+              <svg class="confidence-ring" viewBox="0 0 84 84">
+                <circle cx="42" cy="42" r="34" class="ring-bg"/>
+                <circle cx="42" cy="42" r="34" class="ring-fill" id="confRing"/>
+              </svg>
+              <div class="ring-text" id="confText">0%</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Hallucination -->
+        <div class="metric-card">
+          <div class="metric-label">Hallucination</div>
+          <div class="metric-value" style="margin:8px 0;">
+            <span class="badge badge-lg" id="hallucBadge">-</span>
+          </div>
+          <div class="metric-sub" id="hallucScore"></div>
+        </div>
+
+        <!-- Conflict -->
+        <div class="metric-card">
+          <div class="metric-label">Conflict</div>
+          <div class="metric-value" style="margin:8px 0;">
+            <span class="badge badge-lg" id="conflictBadge">-</span>
+          </div>
+          <div class="metric-sub" id="conflictCount"></div>
+        </div>
+      </div>
+
+      <!-- Result Tabs -->
+      <div class="result-tabs">
+        <div class="tab-headers">
+          <button class="tab-btn active" data-tab="sources">
+            <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+            Sumber <span class="tab-count" id="sourceCount">0</span>
+          </button>
+          <button class="tab-btn" data-tab="claims">
+            <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+            Verifikasi Klaim <span class="tab-count" id="claimCount">0</span>
+          </button>
+          <button class="tab-btn" data-tab="conflicts">
+            <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+            Konflik <span class="tab-count" id="conflictListCount">0</span>
+          </button>
+          <button class="tab-btn" data-tab="timing">
+            <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            Timing
+          </button>
+        </div>
+
+        <div class="tab-content active" data-tab="sources">
+          <ul class="source-list" id="sourceList"></ul>
+        </div>
+
+        <div class="tab-content" data-tab="claims">
+          <div id="claimList"></div>
+        </div>
+
+        <div class="tab-content" data-tab="conflicts">
+          <div id="conflictList"></div>
+        </div>
+
+        <div class="tab-content" data-tab="timing">
+          <div class="timing-grid" id="timingGrid"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ RIGHT: Upload + Docs ============ -->
+  <section class="panel">
+    <div class="panel-header">
+      <h2 style="display:flex;align-items:center;gap:9px;">
+        <span style="display:flex;align-items:center;justify-content:center;width:32px;height:32px;background:linear-gradient(135deg,#8b5cf6,#06b6d4);border-radius:8px;flex-shrink:0;">
+          <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="white" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+        </span>
+        Dokumen
+      </h2>
+      <button class="btn btn-ghost btn-icon" id="btnRefreshDocs" title="Refresh daftar dokumen">
+        <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
+      </button>
+    </div>
+
+    <!-- Upload Zone -->
+    <div class="upload-zone" id="uploadZone">
+      <input type="file" id="fileInput" accept=".pdf,.docx,.txt,.jpg,.jpeg,.png,.bmp,.tiff" hidden>
+      <div class="upload-prompt" id="uploadPrompt">
+        <div class="upload-icon">
+          <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+        </div>
+        <p class="upload-title">Klik atau tarik file ke sini</p>
+        <p class="upload-hint">PDF, DOCX, TXT, JPG, PNG, BMP, TIFF &mdash; maks 100 MB</p>
+      </div>
+      <div class="upload-selected hidden" id="uploadSelected">
+        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+        <span id="selectedFileName"></span>
+        <button class="btn btn-ghost btn-small" id="btnClearFile">Ganti</button>
+      </div>
+    </div>
+
+    <div class="form-row admin-only hidden" style="margin-top:14px">
+      <label class="checkbox-inline">
+        <input type="checkbox" id="isShared">
+        <span>Tandai sebagai shared (admin)</span>
+      </label>
+    </div>
+
+    <button class="btn btn-primary btn-block btn-pill" id="btnUpload" style="margin-top:14px" disabled>
+      <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+      <span>Upload &amp; Index</span>
+    </button>
+
+    <div id="uploadProgress" class="upload-progress hidden">
+      <div class="pulse-dots"><span></span><span></span><span></span></div>
+      <span>Memproses dan mengindeks dokumen...</span>
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="panel-section">
+      <h3 class="section-title">Dokumen Saya</h3>
+      <ul class="doc-list" id="docList">
+        <li class="doc-empty">
+          <div class="empty-icon">
+            <svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+          </div>
+          <p style="font-size:13px;font-weight:500;margin-bottom:4px;">Belum ada dokumen</p>
+          <p style="font-size:12px;color:var(--text-muted);">Upload dokumen di atas untuk mulai</p>
+        </li>
+      </ul>
+      <div id="docPagination" class="pagination hidden"></div>
+      <div id="docPageInfo" class="page-info"></div>
+    </div>
+  </section>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/main.js') }}"></script>
+{% endblock %}

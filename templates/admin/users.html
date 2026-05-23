@@ -1,0 +1,85 @@
+{% extends "base.html" %}
+{% block title %}Users — Admin{% endblock %}
+
+{% block content %}
+<header class="page-header">
+  <div>
+    <h1>Manage Users</h1>
+    <p class="page-subtitle">Buat, lihat, dan kelola akun pengguna.</p>
+  </div>
+</header>
+
+<div class="panel">
+  <div class="panel-header">
+    <h2>Buat User Baru</h2>
+  </div>
+  <form id="createUserForm" class="form-inline-grid">
+    <div class="form-group">
+      <label>Username</label>
+      <input type="text" id="newUsername" placeholder="username" required minlength="3">
+    </div>
+    <div class="form-group">
+      <label>Email <span class="muted small">(opsional)</span></label>
+      <input type="email" id="newEmail" placeholder="email@example.com">
+    </div>
+    <div class="form-group">
+      <label>Password</label>
+      <input type="password" id="newPassword" placeholder="min 6 karakter" required minlength="6">
+    </div>
+    <div class="form-group">
+      <label>Role</label>
+      <select id="newRole">
+        <option value="user">user</option>
+        <option value="admin">admin</option>
+      </select>
+    </div>
+    <div class="form-group form-group-action">
+      <label>&nbsp;</label>
+      <button type="submit" class="btn btn-primary">
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        <span>Buat</span>
+      </button>
+    </div>
+  </form>
+</div>
+
+<div class="panel">
+  <div class="panel-header">
+    <h2>Daftar User</h2>
+    <button class="btn btn-ghost btn-small" id="btnRefreshUsers">
+      <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
+      <span>Refresh</span>
+    </button>
+  </div>
+  <div class="table-wrap">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Username</th>
+          <th>Email</th>
+          <th>Role</th>
+          <th>Status</th>
+          <th>Dibuat</th>
+          <th class="action-col">Aksi</th>
+        </tr>
+      </thead>
+      <tbody id="userTableBody">
+        <tr><td colspan="7" class="muted center">Loading...</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/admin.js') }}"></script>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  AdminAuth.requireAdmin();
+  Admin.loadUsers();
+  document.getElementById('btnRefreshUsers').addEventListener('click', Admin.loadUsers);
+  document.getElementById('createUserForm').addEventListener('submit', Admin.createUser);
+});
+</script>
+{% endblock %}

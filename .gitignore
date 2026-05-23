@@ -1,0 +1,15 @@
+venv/
+__pycache__/
+*.pyc
+*.pyo
+.env
+data/app.db
+data/documents/
+data/uploads/
+logs/
+.DS_Store
+.vscode/settings.json
+.cache/
+*.egg-info/
+dist/
+build/
