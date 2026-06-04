@@ -2,6 +2,10 @@
 
 Sistem tanya-jawab cerdas berbasis dokumen menggunakan Retrieval-Augmented Generation (RAG), dilengkapi deteksi konflik antar dokumen dan verifikasi halusinasi AI secara otomatis.
 
+## Preview 
+Link : 
+deadyiss.github.io/nadeai/ 
+
 ## Fitur Utama
 
 - Upload dokumen PDF, DOCX, TXT, dan foto/gambar
