@@ -34,8 +34,5 @@ sqlalchemy==2.0.49
 werkzeug
 python-dotenv
 colorama
-<<<<<<< HEAD
-=======
 
 flask-wtf
->>>>>>> 0c7befc (Final Revision)

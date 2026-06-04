@@ -1,16 +1,3 @@
-<<<<<<< HEAD
-venv/
-__pycache__/
-*.pyc
-*.pyo
-.env
-data/app.db
-data/documents/
-data/uploads/
-logs/
-.DS_Store
-.vscode/settings.json
-=======
 # Virtual environment
 venv/
 
@@ -33,7 +20,6 @@ logs/
 .vscode/settings.json
 
 # Build / packaging
->>>>>>> 0c7befc (Final Revision)
 .cache/
 *.egg-info/
 dist/
@@ -45,8 +31,4 @@ build/
 htmlcov/
 coverage.xml
 bandit-report.json
-<<<<<<< HEAD
 .tox/
-=======
-.tox/
->>>>>>> 0c7befc (Final Revision)

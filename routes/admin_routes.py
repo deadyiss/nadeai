@@ -8,12 +8,8 @@ from models import get_session, User, Document, QueryHistory, ConflictLog
 from routes import require_admin
 from utils.response_builder import success_response, error_response
 
-<<<<<<< HEAD
-admin_bp = Blueprint("admin", __name__, url_prefix="/admin")
-=======
 # Prefix /api/admin agar tidak bentrok dengan HTML routes /admin/* di app.py
 admin_bp = Blueprint("admin_api", __name__, url_prefix="/api/admin")
->>>>>>> 0c7befc (Final Revision)
 
 
 @admin_bp.route("/dashboard", methods=["GET"])
@@ -81,11 +77,6 @@ def delete_user(current_user, user_id):
         if user is None:
             body, status = error_response("User not found", status_code=404)
             return jsonify(body), status
-<<<<<<< HEAD
-        # Cascade: documents + their embeddings + sessions + queries (cascade configured in models)
-        # Remove vectors from in-memory store first
-=======
->>>>>>> 0c7befc (Final Revision)
         store = get_vector_store()
         docs = s.query(Document).filter(Document.user_id == user_id).all()
         for d in docs:
@@ -121,8 +112,4 @@ def all_queries(current_user):
         return jsonify(success_response(data={
             "queries": [r.to_dict() for r in rows],
             "count": len(rows),
-<<<<<<< HEAD
         }))
-=======
-        }))
->>>>>>> 0c7befc (Final Revision)

@@ -1,80 +1,4 @@
 {% extends "base.html" %}
-<<<<<<< HEAD
-{% block title %}Login — Local RAG{% endblock %}
-
-{% block layout %}
-<div class="auth-shell">
-  <div class="auth-card">
-    <div class="auth-brand">
-      <div class="brand-logo brand-logo-lg" style="margin:0 auto 20px;">
-        <svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
-          <polyline points="3.27 6.96 12 12.01 20.73 6.96"/>
-          <line x1="12" y1="22.08" x2="12" y2="12"/>
-        </svg>
-      </div>
-      <h1>Local RAG System</h1>
-      <p class="muted">Sistem tanya-jawab berbasis dokumen lokal bertenaga AI.</p>
-    </div>
-
-    <form id="loginForm" class="form" autocomplete="on">
-      <div class="form-group">
-        <label for="username">Username</label>
-        <div class="input-with-icon">
-          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-          <input type="text" id="username" name="username" required autofocus placeholder="masukkan username">
-        </div>
-      </div>
-      <div class="form-group">
-        <label for="password">Password</label>
-        <div class="input-with-icon">
-          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-          <input type="password" id="password" name="password" required placeholder="masukkan password">
-        </div>
-      </div>
-      <button type="submit" class="btn btn-primary btn-block btn-pill" id="loginBtn" style="margin-top:4px;padding:13px;">
-        Login
-      </button>
-      <p class="muted small center" style="margin-top:4px;">
-        Belum punya akun? <a href="/register">Buat akun gratis</a>
-      </p>
-    </form>
-    <div id="loginError" class="alert alert-error hidden" style="margin-top:14px;background:rgba(239,68,68,0.12);border-color:rgba(239,68,68,0.25);color:#fca5a5;"></div>
-  </div>
-</div>
-{% endblock %}
-
-{% block scripts %}
-<script>
-document.addEventListener('DOMContentLoaded', () => {
-  if (Auth.getToken()) { window.location.href = '/'; return; }
-  const form = document.getElementById('loginForm');
-  const errBox = document.getElementById('loginError');
-  const btn = document.getElementById('loginBtn');
-  form.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    errBox.classList.add('hidden');
-    btn.disabled = true;
-    btn.innerHTML = '<span class="spinner"></span> Memproses...';
-    try {
-      const data = await API.post('/auth/login', {
-        username: document.getElementById('username').value,
-        password: document.getElementById('password').value
-      }, false);
-      Auth.setToken(data.data.token);
-      Auth.setUser(data.data.user);
-      window.location.href = '/';
-    } catch (err) {
-      errBox.textContent = err.message || 'Login gagal';
-      errBox.classList.remove('hidden');
-      btn.disabled = false;
-      btn.textContent = 'Login';
-    }
-  });
-});
-</script>
-{% endblock %}
-=======
 {% block title %}Login — Nade AI{% endblock %}
 
 {% block extra_css %}
@@ -147,4 +71,3 @@ document.addEventListener('DOMContentLoaded', () => {
 
 </div>
 {% endblock %}
->>>>>>> 0c7befc (Final Revision)
