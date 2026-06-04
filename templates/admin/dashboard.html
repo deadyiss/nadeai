@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+<<<<<<< HEAD
 {% block title %}Admin Dashboard — Local RAG{% endblock %}
 
 {% block content %}
@@ -114,3 +115,124 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 </script>
 {% endblock %}
+=======
+{% block title %}Admin Dashboard — Nade AI{% endblock %}
+
+{% block content %}
+<div class="app-layout">
+  {% set active_page = 'dashboard' %}
+  {% include 'partials/sidebar.html' %}
+
+  <div class="main-content">
+    <div class="page-header">
+      <div>
+        <div class="page-title">Admin Dashboard</div>
+        <div class="page-subtitle">Overview sistem, statistik, dan riwayat query.</div>
+      </div>
+      <a href="{{ url_for('admin_dashboard') }}" class="btn-refresh">
+        <svg><use href="#ico-refresh"/></svg> Refresh
+      </a>
+    </div>
+
+    <div class="page-body">
+
+      <!-- STATS -->
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-icon"><svg><use href="#ico-users"/></svg></div>
+          <div class="stat-label">Users</div>
+          <div class="stat-value">{{ stats.total_users }}</div>
+          <div class="stat-desc">{{ stats.active_users }} aktif · {{ stats.admin_count }} admin</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon"><svg><use href="#ico-docs"/></svg></div>
+          <div class="stat-label">Documents</div>
+          <div class="stat-value">{{ stats.total_documents }}</div>
+          <div class="stat-desc">{{ stats.shared_documents }} shared</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon"><svg><use href="#ico-search"/></svg></div>
+          <div class="stat-label">Queries</div>
+          <div class="stat-value">{{ stats.total_queries }}</div>
+          <div class="stat-desc">{{ stats.conflict_queries }} dengan konflik</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon"><svg><use href="#ico-warning"/></svg></div>
+          <div class="stat-label">Conflicts</div>
+          <div class="stat-value">{{ stats.total_conflicts }}</div>
+          <div class="stat-desc">total logged</div>
+        </div>
+      </div>
+
+      <!-- VECTOR STORE -->
+      <div class="section-card">
+        <div class="section-card-header">
+          <span class="section-card-title">Vector Store</span>
+        </div>
+        <div class="section-card-body">
+          <div class="vector-grid">
+            <div class="vector-item">
+              <div class="vector-item-label">Total Vectors</div>
+              <div class="vector-item-value">{{ vector_store.total_vectors }}</div>
+            </div>
+            <div class="vector-item">
+              <div class="vector-item-label">Dimension</div>
+              <div class="vector-item-value">{{ vector_store.dimension }}</div>
+            </div>
+            <div class="vector-item">
+              <div class="vector-item-label">Embedding Model</div>
+              <div class="vector-item-value mono">{{ vector_store.model }}</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- QUERY HISTORY -->
+      <div class="section-card">
+        <div class="section-card-header">
+          <span class="section-card-title">Query History</span>
+          <span style="font-size:0.75rem;color:var(--ink-muted);font-weight:300">50 query terbaru</span>
+        </div>
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Waktu</th>
+              <th>User</th>
+              <th>Query</th>
+              <th>Confidence</th>
+              <th>Conflict</th>
+              <th>Exec</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% if query_history %}
+              {% for row in query_history %}
+              <tr>
+                <td data-label="Waktu" style="white-space:nowrap">{{ row.created_at.strftime('%d %b %Y %H:%M') }}</td>
+                <td data-label="User">{{ row.username }}</td>
+                <td data-label="Query" style="max-width:300px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ row.query }}</td>
+                <td data-label="Confidence">{{ "%.0f"|format(row.confidence * 100) }}%</td>
+                <td data-label="Conflict">
+                  {% if row.has_conflict %}
+                    <span class="badge" style="background:rgba(180,50,50,0.1);color:#8B3333">Ya</span>
+                  {% else %}
+                    <span style="color:var(--ink-muted);font-weight:300">—</span>
+                  {% endif %}
+                </td>
+                <td data-label="Exec" style="color:var(--ink-muted)">{{ row.exec_ms }}ms</td>
+              </tr>
+              {% endfor %}
+            {% else %}
+              <tr>
+                <td colspan="6" class="empty-state">Belum ada query.</td>
+              </tr>
+            {% endif %}
+          </tbody>
+        </table>
+      </div>
+
+    </div>
+  </div>
+</div>
+{% endblock %}
+>>>>>>> 0c7befc (Final Revision)

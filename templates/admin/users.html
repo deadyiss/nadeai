@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+<<<<<<< HEAD
 {% block title %}Users — Admin{% endblock %}
 
 {% block content %}
@@ -83,3 +84,119 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 </script>
 {% endblock %}
+=======
+{% block title %}Manage Users — Nade AI{% endblock %}
+
+{% block content %}
+<div class="app-layout">
+  {% set active_page = 'users' %}
+  {% include 'partials/sidebar.html' %}
+
+  <div class="main-content">
+    <div class="page-header">
+      <div>
+        <div class="page-title">Manage Users</div>
+        <div class="page-subtitle">Buat, lihat, dan kelola akun pengguna.</div>
+      </div>
+    </div>
+
+    <div class="page-body">
+      {% with messages = get_flashed_messages(with_categories=true) %}
+        {% for category, message in messages %}
+          <div style="background:{% if category == 'error' %}rgba(180,50,50,0.08){% else %}rgba(80,75,56,0.08){% endif %};border:1px solid {% if category == 'error' %}rgba(180,50,50,0.2){% else %}var(--border-strong){% endif %};border-radius:8px;padding:0.75rem 1rem;margin-bottom:1.25rem;font-size:0.825rem;color:{% if category == 'error' %}#8B3333{% else %}var(--cream-dark){% endif %};">
+            {{ message }}
+          </div>
+        {% endfor %}
+      {% endwith %}
+
+      <div class="form-split">
+
+        <!-- CREATE USER -->
+        <div class="section-card">
+          <div class="section-card-header">
+            <span class="section-card-title">Buat User Baru</span>
+          </div>
+          <div class="section-card-body">
+            <form method="POST" action="{{ url_for('admin_create_user') }}">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+              <div class="form-group">
+                <label class="form-label">Username</label>
+                <input class="form-input" type="text" name="username" placeholder="username" required minlength="3">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Email <span>— opsional</span></label>
+                <input class="form-input" type="email" name="email" placeholder="email@example.com">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Password</label>
+                <input class="form-input" type="password" name="password" placeholder="min 6 karakter" required minlength="6">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Role</label>
+                <select class="form-select" name="role">
+                  <option value="user">user</option>
+                  <option value="admin">admin</option>
+                </select>
+              </div>
+              <button class="btn-primary" type="submit" style="margin-top:0.5rem">
+                <svg width="14" height="14" style="display:inline;vertical-align:-2px;margin-right:4px"><use href="#ico-plus"/></svg>
+                Buat
+              </button>
+            </form>
+          </div>
+        </div>
+
+        <!-- USER LIST -->
+        <div class="section-card">
+          <div class="section-card-header">
+            <span class="section-card-title">Daftar User</span>
+            <span class="badge badge-user">{{ users|length }} total</span>
+          </div>
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Username</th>
+                <th>Email</th>
+                <th>Role</th>
+                <th>Aksi</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for user in users %}
+              <tr>
+                <td data-label="Username" style="font-weight:500">{{ user.username }}</td>
+                <td data-label="Email" style="color:var(--ink-muted)">{{ user.email or '—' }}</td>
+                <td data-label="Role">
+                  <span class="badge {% if user.role == 'admin' %}badge-admin{% else %}badge-user{% endif %}">
+                    {{ user.role }}
+                  </span>
+                </td>
+                <td data-label="Aksi">
+                  {% if user.username != current_user.username %}
+                  <form method="POST" action="{{ url_for('admin_delete_user', user_id=user.id) }}"
+                        onsubmit="return confirm('Hapus user {{ user.username }}?')">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <button type="submit" class="btn-danger">
+                      <svg><use href="#ico-trash"/></svg>
+                    </button>
+                  </form>
+                  {% else %}
+                  <span style="font-size:0.75rem;color:var(--ink-muted);font-weight:300">—</span>
+                  {% endif %}
+                </td>
+              </tr>
+              {% else %}
+              <tr>
+                <td colspan="4" class="empty-state">Belum ada user.</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+>>>>>>> 0c7befc (Final Revision)

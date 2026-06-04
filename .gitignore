@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 venv/
 __pycache__/
 *.pyc
@@ -9,6 +10,30 @@ data/uploads/
 logs/
 .DS_Store
 .vscode/settings.json
+=======
+# Virtual environment
+venv/
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+
+# Secrets
+.env
+
+# Data (database, dokumen upload, hasil scan/temp)
+data/
+
+# Logs
+logs/
+
+# OS / editor
+.DS_Store
+.vscode/settings.json
+
+# Build / packaging
+>>>>>>> 0c7befc (Final Revision)
 .cache/
 *.egg-info/
 dist/
@@ -20,4 +45,8 @@ build/
 htmlcov/
 coverage.xml
 bandit-report.json
+<<<<<<< HEAD
 .tox/
+=======
+.tox/
+>>>>>>> 0c7befc (Final Revision)

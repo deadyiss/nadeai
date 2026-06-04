@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 280" role="img" aria-label="nade AI">
+  <rect width="320" height="280" fill="#F0ECE3"/>
+  <g transform="translate(160 150)">
+    <text x="-92" y="28" font-family="Poppins, 'Segoe UI', sans-serif" font-weight="600"
+          font-size="96" letter-spacing="-4" fill="#1F2A37" text-anchor="start">nade</text>
+    <circle cx="-5" cy="-3" r="10.5" fill="#C8A062"/>
+    <text x="62" y="-44" font-family="Poppins, 'Segoe UI', sans-serif" font-weight="500"
+          font-size="38" letter-spacing="2" fill="#C8A062">AI</text>
+  </g>
+</svg>

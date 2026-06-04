@@ -28,6 +28,10 @@ UPLOAD_FOLDER       = os.path.join(BASE_DIR, "data", "documents")
 TEMP_UPLOAD_FOLDER  = os.path.join(BASE_DIR, "data", "uploads")
 MAX_FILE_SIZE_MB    = int(os.getenv("MAX_FILE_SIZE_MB", 100))
 MAX_FILE_SIZE_BYTES = MAX_FILE_SIZE_MB * 1024 * 1024
+<<<<<<< HEAD
+=======
+MAX_SCAN_PAGES      = int(os.getenv("MAX_SCAN_PAGES", 20))
+>>>>>>> 0c7befc (Final Revision)
 ALLOWED_EXTENSIONS  = {"pdf", "docx", "txt", "jpg", "jpeg", "png", "bmp", "tiff"}
 
 # ----------------------------
@@ -73,4 +77,10 @@ NLI_CONTRADICTION_THRESHOLD = float(os.getenv("NLI_CONTRADICTION_THRESHOLD", 0.5
 # ----------------------------
 ADMIN_USERNAME = os.getenv("ADMIN_USERNAME", "admin")
 ADMIN_PASSWORD = os.getenv("ADMIN_PASSWORD", "admin123")
+<<<<<<< HEAD
 ADMIN_EMAIL    = os.getenv("ADMIN_EMAIL", "admin@local")
+=======
+ADMIN_EMAIL    = os.getenv("ADMIN_EMAIL", "admin@local")
+# --- Template context helpers ---
+# (digunakan di app.py inject ke template)
+>>>>>>> 0c7befc (Final Revision)

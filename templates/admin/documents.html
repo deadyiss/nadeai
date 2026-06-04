@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+<<<<<<< HEAD
 {% block title %}Documents — Admin{% endblock %}
 
 {% block content %}
@@ -45,3 +46,87 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 </script>
 {% endblock %}
+=======
+{% block title %}Semua Dokumen — Nade AI{% endblock %}
+
+{% block content %}
+<div class="app-layout">
+  {% set active_page = 'documents' %}
+  {% include 'partials/sidebar.html' %}
+
+  <div class="main-content">
+    <div class="page-header">
+      <div>
+        <div class="page-title">Semua Dokumen</div>
+        <div class="page-subtitle">Lihat seluruh dokumen yang terindex di sistem.</div>
+      </div>
+      <a href="{{ url_for('admin_documents') }}" class="btn-refresh">
+        <svg><use href="#ico-refresh"/></svg> Refresh
+      </a>
+    </div>
+
+    <div class="page-body">
+      <div class="section-card">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Filename</th>
+              <th>Owner</th>
+              <th>Kata</th>
+              <th>Visibility</th>
+              <th>Dibuat</th>
+              <th>Aksi</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% if documents %}
+              {% for doc in documents %}
+              <tr>
+                <td data-label="ID" style="color:var(--ink-muted);font-family:monospace;font-size:0.75rem">{{ doc.id }}</td>
+                <td data-label="Filename" style="font-weight:400;max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">
+                  <svg width="12" height="12" style="color:var(--cream-mid);margin-right:6px;vertical-align:-1px"><use href="#ico-file"/></svg>
+                  {{ doc.filename }}
+                </td>
+                <td data-label="Owner">{{ doc.owner }}</td>
+                <td data-label="Kata" style="font-variant-numeric:tabular-nums">{{ "{:,}".format(doc.word_count) }}</td>
+                <td data-label="Visibility">
+                  {% if doc.is_shared %}
+                    <span class="badge badge-shared">Shared</span>
+                  {% else %}
+                    <span style="font-size:0.75rem;color:var(--ink-muted);font-weight:300">Private</span>
+                  {% endif %}
+                </td>
+                <td data-label="Dibuat" style="white-space:nowrap;color:var(--ink-muted)">{{ doc.created_at.strftime('%d %b %Y') }}</td>
+                <td data-label="Aksi">
+                  <form method="POST" action="{{ url_for('admin_delete_document', doc_id=doc.id) }}"
+                        onsubmit="return confirm('Hapus dokumen ini?')">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <button type="submit" class="btn-danger">
+                      <svg><use href="#ico-trash"/></svg>
+                    </button>
+                  </form>
+                </td>
+              </tr>
+              {% endfor %}
+            {% else %}
+              <tr>
+                <td colspan="7">
+                  <div class="empty-state">
+                    <svg class="empty-state-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1">
+                      <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/>
+                      <polyline points="14 2 14 8 20 8"/>
+                    </svg>
+                    Belum ada dokumen.
+                  </div>
+                </td>
+              </tr>
+            {% endif %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+>>>>>>> 0c7befc (Final Revision)

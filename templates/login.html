@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+<<<<<<< HEAD
 {% block title %}Login — Local RAG{% endblock %}
 
 {% block layout %}
@@ -73,3 +74,77 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 </script>
 {% endblock %}
+=======
+{% block title %}Login — Nade AI{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/auth.css', v=5) }}">
+{% endblock %}
+
+{% block content %}
+<div class="auth-layout">
+
+  <!-- LEFT PANEL -->
+  <div class="auth-panel-left">
+    <div class="auth-brand">
+      <svg class="auth-wordmark" width="150" height="53" viewBox="0 0 182 64" aria-label="nade AI"><use href="#nade-wordmark"/></svg>
+    </div>
+
+    <div class="auth-tagline">
+      <h1>Tanya dokumenmu,<br>dapatkan <em>jawaban</em><br>yang tepat.</h1>
+      <p>Sistem tanya-jawab berbasis dokumen lokal bertenaga AI — privat, cepat, dan aman.</p>
+    </div>
+
+    <div class="auth-ornament">
+      <svg viewBox="0 0 200 200" fill="none" stroke="white" stroke-width="0.5">
+        <circle cx="100" cy="100" r="90"/>
+        <circle cx="100" cy="100" r="70"/>
+        <circle cx="100" cy="100" r="50"/>
+        <circle cx="100" cy="100" r="30"/>
+        <line x1="10" y1="100" x2="190" y2="100"/>
+        <line x1="100" y1="10" x2="100" y2="190"/>
+        <line x1="29" y1="29" x2="171" y2="171"/>
+        <line x1="171" y1="29" x2="29" y2="171"/>
+      </svg>
+    </div>
+  </div>
+
+  <!-- RIGHT PANEL -->
+  <div class="auth-panel-right">
+    <div class="auth-form-container">
+      <div class="auth-form-title">Selamat datang</div>
+      <div class="auth-form-subtitle">Masuk untuk menggunakan Nade AI</div>
+
+      {% with messages = get_flashed_messages(with_categories=true) %}
+        {% for category, message in messages %}
+          <div style="background:rgba(180,50,50,0.08);border:1px solid rgba(180,50,50,0.2);border-radius:8px;padding:0.75rem 1rem;margin-bottom:1rem;font-size:0.825rem;color:#8B3333;">
+            {{ message }}
+          </div>
+        {% endfor %}
+      {% endwith %}
+
+      <form method="POST" action="{{ url_for('login') }}">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+        <div class="form-group">
+          <label class="form-label">Username</label>
+          <input class="form-input" type="text" name="username" placeholder="masukkan username" required autocomplete="username">
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Password</label>
+          <input class="form-input" type="password" name="password" placeholder="masukkan password" required autocomplete="current-password">
+        </div>
+
+        <button class="btn-primary" type="submit">Masuk</button>
+      </form>
+
+      <div class="auth-footer">
+        Belum punya akun? <a href="{{ url_for('register') }}">Buat akun gratis</a>
+      </div>
+    </div>
+  </div>
+
+</div>
+{% endblock %}
+>>>>>>> 0c7befc (Final Revision)

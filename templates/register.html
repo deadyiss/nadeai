@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+<<<<<<< HEAD
 {% block title %}Register — Local RAG{% endblock %}
 
 {% block layout %}
@@ -87,3 +88,67 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 </script>
 {% endblock %}
+=======
+{% block title %}Register — Nade AI{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/auth.css', v=5) }}">
+{% endblock %}
+
+{% block content %}
+<div class="auth-layout">
+
+  <div class="auth-panel-left">
+    <div class="auth-brand">
+      <svg class="auth-wordmark" width="150" height="53" viewBox="0 0 182 64" aria-label="nade AI"><use href="#nade-wordmark"/></svg>
+    </div>
+
+    <div class="auth-tagline">
+      <h1>Bergabunglah,<br>mulai <em>eksplorasi</em><br>dokumenmu.</h1>
+      <p>Daftarkan akun dan mulai mengindex dokumen. Gratis, lokal, dan sepenuhnya milikmu.</p>
+    </div>
+  </div>
+
+  <div class="auth-panel-right">
+    <div class="auth-form-container">
+      <div class="auth-form-title">Buat Akun Baru</div>
+      <div class="auth-form-subtitle">Daftarkan akun untuk mulai menggunakan Nade AI</div>
+
+      {% with messages = get_flashed_messages(with_categories=true) %}
+        {% for category, message in messages %}
+          <div style="background:rgba(180,50,50,0.08);border:1px solid rgba(180,50,50,0.2);border-radius:8px;padding:0.75rem 1rem;margin-bottom:1rem;font-size:0.825rem;color:#8B3333;">
+            {{ message }}
+          </div>
+        {% endfor %}
+      {% endwith %}
+
+      <form method="POST" action="{{ url_for('register') }}">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+        <div class="form-group">
+          <label class="form-label">Username</label>
+          <input class="form-input" type="text" name="username" placeholder="minimum 3 karakter" required minlength="3">
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Email <span>— opsional</span></label>
+          <input class="form-input" type="email" name="email" placeholder="email@example.com">
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Password</label>
+          <input class="form-input" type="password" name="password" placeholder="minimum 6 karakter" required minlength="6">
+        </div>
+
+        <button class="btn-primary" type="submit">Buat Akun</button>
+      </form>
+
+      <div class="auth-footer">
+        Sudah punya akun? <a href="{{ url_for('login') }}">Login sekarang</a>
+      </div>
+    </div>
+  </div>
+
+</div>
+{% endblock %}
+>>>>>>> 0c7befc (Final Revision)

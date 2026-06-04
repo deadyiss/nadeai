@@ -1,0 +1,59 @@
+<!-- Mobile top app bar (phones only) -->
+<header class="mobile-topbar">
+  <button class="nav-toggle" type="button" data-nav="open" aria-label="Buka menu">
+    <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+  </button>
+  <svg class="topbar-wordmark" width="86" height="30" viewBox="0 0 182 64" aria-label="nade AI"><use href="#nade-wordmark"/></svg>
+</header>
+
+<!-- Backdrop when drawer open -->
+<div class="nav-overlay" data-nav="close"></div>
+
+<!-- Floating button to reopen sidebar when collapsed (desktop) -->
+<button class="nav-fab" type="button" data-nav="show" aria-label="Tampilkan menu">
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+</button>
+
+<!-- Sidebar -->
+<aside class="sidebar">
+  <div class="sidebar-header">
+    <div class="sidebar-brand-block">
+      <svg class="sidebar-wordmark" width="116" height="41" viewBox="0 0 182 64" aria-label="nade AI"><use href="#nade-wordmark"/></svg>
+      <small class="sidebar-brand-sub">Document Q&amp;A</small>
+    </div>
+    <button class="nav-collapse-btn" type="button" data-nav="collapse" aria-label="Sembunyikan menu" title="Sembunyikan menu">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+    </button>
+  </div>
+
+  <nav class="sidebar-nav">
+    <div class="sidebar-section-label">Menu Utama</div>
+    <a href="{{ url_for('index') }}" class="sidebar-item {% if active_page == 'qa' %}active{% endif %}">
+      <svg><use href="#ico-home"/></svg> Tanya Dokumen
+    </a>
+
+    {% if current_user.is_admin %}
+    <div class="sidebar-section-label">Admin</div>
+    <a href="{{ url_for('admin_dashboard') }}" class="sidebar-item {% if active_page == 'dashboard' %}active{% endif %}">
+      <svg><use href="#ico-grid"/></svg> Dashboard
+    </a>
+    <a href="{{ url_for('admin_users') }}" class="sidebar-item {% if active_page == 'users' %}active{% endif %}">
+      <svg><use href="#ico-users"/></svg> Users
+    </a>
+    <a href="{{ url_for('admin_documents') }}" class="sidebar-item {% if active_page == 'documents' %}active{% endif %}">
+      <svg><use href="#ico-docs"/></svg> Semua Dokumen
+    </a>
+    {% endif %}
+  </nav>
+
+  <div class="sidebar-user">
+    <div class="sidebar-avatar">{{ current_user.username[0].upper() }}</div>
+    <div class="sidebar-user-info">
+      <div class="sidebar-user-name">{{ current_user.username }}</div>
+      <div class="sidebar-user-role">{{ current_user.role }}</div>
+    </div>
+    <a href="{{ url_for('logout') }}" class="sidebar-logout" title="Logout">
+      <svg><use href="#ico-logout"/></svg>
+    </a>
+  </div>
+</aside>
