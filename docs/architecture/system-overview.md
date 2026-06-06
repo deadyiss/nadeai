@@ -2,33 +2,11 @@
 
 ## Konsep Utama
 
-**RAG System (Retrieval-Augmented Generation)** — sistem tanya-jawab yang menjawab pertanyaan user berdasarkan dokumen yang mereka unggah, bukan dari pengetahuan umum AI.
+**RAG (Retrieval-Augmented Generation)** — AI menjawab pertanyaan berdasarkan dokumen yang di-upload, bukan pengetahuan umum. Dilengkapi deteksi konflik antar dokumen dan verifikasi halusinasi per klaim.
 
 ---
 
-## Analogi Sederhana
-
-```
-User upload 4 laporan proyek
-       ↓
-Sistem "membaca" dan "mengingat" semua dokumen (chunking + embedding)
-       ↓
-User tanya: "Berapa anggaran proyek SmartCity?"
-       ↓
-Sistem cari chunk dokumen paling relevan
-       ↓
-Cek: ada informasi yang saling bertentangan?
-       ↓
-Groq API (llama-3.1-8b-instant) buat jawaban dari chunk tersebut
-       ↓
-NLI model verifikasi: apakah klaim ada di dokumen?
-       ↓
-User terima: jawaban + sumber + confidence + status konflik
-```
-
----
-
-## Arsitektur Sistem
+## Arsitektur
 
 ```
 ┌──────────────────────────────────────────────────────────┐
@@ -38,52 +16,54 @@ User terima: jawaban + sumber + confidence + status konflik
 │  │  http://IP:5000  │        │   python3 cli.py       │  │
 │  └────────┬─────────┘        └──────────┬─────────────┘  │
 └───────────┼──────────────────────────────┼───────────────┘
-            │ HTTP                         │ Direct Call
+            │ HTTP (session-based)         │ Direct Python call
             ▼                             ▼
 ┌──────────────────────────────────────────────────────────┐
 │                  APPLICATION LAYER                       │
-│              Flask Web Server (Waitress)                 │
-│   POST /api/upload     POST /api/query                   │
-│   POST /auth/login     POST /auth/register               │
-│   GET  /api/documents  GET  /admin/dashboard             │
+│              Flask + Waitress (0.0.0.0:5000)            │
+│   HTML routes  /  API blueprints  /  CSRF protection    │
 └─────────────────────────┬────────────────────────────────┘
                           ▼
 ┌──────────────────────────────────────────────────────────┐
 │                    CORE LAYER                            │
 │                                                          │
-│  Document Processor → Text Chunker → Embedding Engine   │
+│  document_processor → text_cleaner → embedding_engine  │
+│         (PDF/DOCX/TXT/OCR)    (chunk 300w/50w)          │
 │                                ↓                         │
-│                          Vector Store                    │
+│                          vector_store                    │
+│                    (in-memory NumPy + SQLite)            │
 │                                ↓                         │
-│         Conflict Detector ←──→ Hallucination Checker    │
+│         conflict_detector ←──→ query_processor          │
+│         (TEMPORAL/VALUE/      (orchestrator pipeline)   │
+│          MULTI_SOURCE)                ↓                  │
+│                          llm_engine (Groq API)           │
 │                                ↓                         │
-│                          LLM Engine                      │
-│                    (Groq API — cloud)                    │
+│                    hallucination_checker                 │
+│                    (cosine gate + NLI mDeBERTa)          │
 └─────────────────────────┬────────────────────────────────┘
                           ▼
 ┌──────────────────────────────────────────────────────────┐
 │                    DATA LAYER                            │
-│  SQLite DB                       File System             │
-│  ├─ users                        data/documents/         │
-│  ├─ documents (per chunk)        └─ <user_id>/           │
-│  ├─ embeddings_cache             data/uploads/           │
+│  SQLite (app.db)                   File System           │
+│  ├─ users                          data/documents/       │
+│  ├─ documents (per chunk)          └─ <user_id>/         │
+│  ├─ embeddings_cache               data/uploads/ (temp) │
 │  ├─ query_history                                        │
 │  ├─ sessions                                             │
 │  └─ conflicts_log                                        │
-└──────────────────────────────────────────────────────────┘
-                          │
-                          ▼ (keluar ke internet)
+└─────────────────────────┬────────────────────────────────┘
+                          │ (keluar ke internet)
+                          ▼
 ┌──────────────────────────────────────────────────────────┐
-│                  EXTERNAL SERVICES                       │
-│   Groq API (api.groq.com)                               │
-│   Model: llama-3.1-8b-instant                           │
-│   Latency: ~400-800ms/request                           │
+│               EXTERNAL SERVICES                          │
+│  Groq API (api.groq.com) — llama-3.1-8b-instant         │
+│  HuggingFace (download model, sekali saja)               │
 └──────────────────────────────────────────────────────────┘
 ```
 
 ---
 
-## Multi-User & Role System
+## Multi-User & Role
 
 | Fitur | Admin | User |
 |-------|-------|------|
@@ -94,24 +74,44 @@ User terima: jawaban + sumber + confidence + status konflik
 | Lihat dokumen user lain | ✓ | ✗ |
 | Hapus dokumen manapun | ✓ | ✗ |
 | Manage users | ✓ | ✗ |
-| Monitor sistem | ✓ | ✗ |
-| Lihat semua query history | ✓ | ✗ |
+| Monitor query history | ✓ | ✗ |
+| CLI (bypass auth) | berjalan sebagai admin | — |
 
 ---
 
-## LAN Network Setup
+## Network Setup
 
 ```
-          WiFi Router / LAN
-               │
-    ┌──────────┼──────────┐
-    │          │          │
-┌───┴───┐  ┌──┴───┐  ┌───┴──┐
-│Laptop │  │  HP  │  │ Tab  │
-│SERVER │  │CLIENT│  │CLIENT│
-│:5000  │  │:5000 │  │:5000 │
-└───────┘  └──────┘  └──────┘
+         WiFi Router / LAN
+              │
+   ┌──────────┼──────────┐
+   │          │          │
+┌──┴───┐  ┌──┴───┐  ┌───┴──┐
+│SERVER│  │CLIENT│  │CLIENT│
+│:5000 │  │ HP   │  │Tablet│
+└──────┘  └──────┘  └──────┘
 
-Laptop menjalankan python3 app.py
-Perangkat lain akses http://<IP_LAPTOP>:5000
+Server: python3 app.py (bind 0.0.0.0:5000)
+Client: http://<IP_SERVER>:5000
 ```
+
+---
+
+## Status Fitur
+
+| Fitur | Status |
+|-------|--------|
+| Upload PDF/DOCX/TXT | ✅ Selesai |
+| Upload gambar + OCR | ✅ Selesai |
+| Multi-page camera scan | ✅ Selesai |
+| Document chunking | ✅ Selesai |
+| Similarity search (cosine) | ✅ Selesai |
+| Conflict detection (3 tipe) | ✅ Selesai |
+| Hallucination check (NLI) | ✅ Selesai |
+| Groq API integration | ✅ Selesai |
+| Ollama fallback | ✅ Selesai |
+| Multi-user + auth | ✅ Selesai |
+| Admin dashboard | ✅ Selesai |
+| CLI | ✅ Selesai |
+| GitHub Actions CI/CD | ✅ Selesai |
+| Formal test suite | ✅ Selesai (Phase 7) |

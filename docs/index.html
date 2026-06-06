@@ -2,2287 +2,932 @@
 <html lang="id">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Preview — Nade AI</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Nade AI — Preview</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=DM+Sans:wght@300;400;500&family=Poppins:wght@500;600;700&display=swap" rel="stylesheet">
 <style>
-:root {
-  --cream-lightest: #F8F3D9;
-  --cream-light: #EBE5C2;
-  --cream-mid: #B9B28A;
-  --cream-dark: #504B38;
-  --ink: #1A1814;
-  --ink-soft: #2E2B22;
-  --ink-muted: #6B6554;
-  --surface: #FDFAF0;
-  --surface-2: #F3EDD6;
-  --border: rgba(80,75,56,0.15);
-  --border-strong: rgba(80,75,56,0.3);
-}
-
-* { margin: 0; padding: 0; box-sizing: border-box; }
-
-body {
-  font-family: 'DM Sans', sans-serif;
-  background: var(--cream-lightest);
-  color: var(--ink);
-  min-height: 100vh;
-  overflow-x: hidden;
-}
-
-/* Subtle scrollbar */
-::-webkit-scrollbar { width: 5px; }
-::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: 3px; }
-
-@keyframes fadeUp {
-  from { opacity: 0; transform: translateY(12px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
-
-/* Toast */
-#toast {
-  position: fixed;
-  bottom: 2rem; left: 50%; transform: translateX(-50%);
-  background: var(--ink);
-  color: var(--cream-lightest);
-  padding: 0.75rem 1.5rem;
-  border-radius: 8px;
-  font-size: 0.825rem;
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 0.2s;
-  z-index: 9999;
-  white-space: nowrap;
-}
-#toast.show { opacity: 1; }
-
-/* ─── FORMS ─── */
-.form-group { margin-bottom: 1.25rem; }
-
-.form-label {
-  display: block;
-  font-size: 0.75rem;
-  font-weight: 500;
-  color: var(--cream-dark);
-  margin-bottom: 0.5rem;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-}
-
-.form-label span {
-  font-weight: 300;
-  text-transform: none;
-  letter-spacing: 0;
-  color: var(--ink-muted);
-}
-
-.form-input {
-  width: 100%;
-  height: 48px;
-  background: var(--surface);
-  border: 1px solid var(--border-strong);
-  border-radius: 8px;
-  padding: 0 1rem;
-  font-family: 'DM Sans', sans-serif;
-  font-size: 0.9rem;
-  color: var(--ink);
-  outline: none;
-  transition: border-color 0.2s, background 0.2s;
-}
-
-.form-input::placeholder { color: var(--ink-muted); opacity: 0.5; }
-
-.form-input:focus {
-  border-color: var(--cream-dark);
-  background: var(--cream-lightest);
-}
-
-.form-select {
-  width: 100%;
-  height: 48px;
-  background: var(--surface);
-  border: 1px solid var(--border-strong);
-  border-radius: 8px;
-  padding: 0 1rem;
-  font-family: 'DM Sans', sans-serif;
-  font-size: 0.9rem;
-  color: var(--ink);
-  outline: none;
-  cursor: pointer;
-  appearance: none;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23504B38' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
-  background-repeat: no-repeat;
-  background-position: right 1rem center;
-}
-
-/* ─── BUTTONS ─── */
-.btn-primary {
-  width: 100%;
-  height: 50px;
-  background: var(--ink);
-  color: var(--cream-lightest);
-  border: none;
-  border-radius: 8px;
-  font-family: 'DM Sans', sans-serif;
-  font-size: 0.875rem;
-  font-weight: 500;
-  letter-spacing: 0.04em;
-  cursor: pointer;
-  transition: background 0.2s, transform 0.1s;
-  margin-top: 0.5rem;
-}
-
-.btn-primary:hover { background: var(--ink-soft); }
-.btn-primary:active { transform: scale(0.99); }
-
-.btn-secondary {
-  height: 36px;
-  padding: 0 1rem;
-  background: transparent;
-  border: 1px solid var(--border-strong);
-  border-radius: 7px;
-  font-family: 'DM Sans', sans-serif;
-  font-size: 0.775rem;
-  font-weight: 500;
-  color: var(--ink-muted);
-  cursor: pointer;
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  transition: all 0.15s;
-}
-
-.btn-secondary:hover { border-color: var(--cream-dark); color: var(--cream-dark); }
-.btn-secondary svg { width: 14px; height: 14px; }
-
-.btn-danger {
-  height: 36px;
-  padding: 0 1rem;
-  background: transparent;
-  border: 1px solid rgba(180,50,50,0.2);
-  border-radius: 7px;
-  font-family: 'DM Sans', sans-serif;
-  font-size: 0.775rem;
-  font-weight: 500;
-  color: #8B3333;
-  cursor: pointer;
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  transition: all 0.15s;
-}
-
-.btn-danger:hover { background: rgba(180,50,50,0.06); }
-.btn-danger svg { width: 14px; height: 14px; }
-
-.btn-refresh {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 0.5rem 1rem;
-  border: 1px solid var(--border-strong);
-  border-radius: 7px;
-  background: var(--cream-lightest);
-  font-family: 'DM Sans', sans-serif;
-  font-size: 0.775rem;
-  font-weight: 500;
-  color: var(--ink-muted);
-  cursor: pointer;
-  transition: all 0.15s;
-}
-
-.btn-refresh:hover { border-color: var(--cream-dark); color: var(--cream-dark); }
-.btn-refresh svg { width: 13px; height: 13px; }
-
-.btn-ask {
-  height: 40px;
-  padding: 0 1.5rem;
-  background: var(--ink);
-  color: var(--cream-lightest);
-  border: none;
-  border-radius: 8px;
-  font-family: 'DM Sans', sans-serif;
-  font-size: 0.825rem;
-  font-weight: 500;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  transition: background 0.2s;
-}
-
-.btn-ask:hover { background: var(--ink-soft); }
-.btn-ask svg { width: 14px; height: 14px; }
-
-.btn-upload {
-  margin: 0 1.5rem 1.5rem;
-  width: calc(100% - 3rem);
-  height: 44px;
-  background: var(--cream-light);
-  border: 1px solid var(--border-strong);
-  border-radius: 8px;
-  font-family: 'DM Sans', sans-serif;
-  font-size: 0.825rem;
-  font-weight: 500;
-  color: var(--cream-dark);
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  transition: background 0.2s;
-}
-
-.btn-upload:hover { background: var(--cream-mid); color: var(--cream-lightest); }
-.btn-upload svg { width: 14px; height: 14px; }
-
-/* ─── BADGES ─── */
-.badge {
-  display: inline-flex;
-  align-items: center;
-  padding: 2px 8px;
-  border-radius: 4px;
-  font-size: 0.7rem;
-  font-weight: 500;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-}
-
-.badge-admin { background: rgba(80,75,56,0.12); color: var(--cream-dark); }
-.badge-user  { background: rgba(185,178,138,0.2); color: var(--ink-muted); }
-.badge-shared { background: rgba(80,75,56,0.08); color: var(--cream-dark); }
-
-/* ─── SIDEBAR ─── */
-.app-layout {
-  width: 100%;
-  display: grid;
-  grid-template-columns: 240px 1fr;
-  min-height: 100vh;
-}
-
-.sidebar {
-  background: var(--ink);
-  display: flex;
-  flex-direction: column;
-  position: sticky;
-  top: 0;
-  height: 100vh;
-  overflow-y: auto;
-}
-
-.sidebar-header {
-  padding: 1.75rem 1.5rem 1.25rem;
-  border-bottom: 1px solid rgba(235,229,194,0.08);
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.sidebar-logo {
-  width: 32px; height: 32px;
-  background: var(--cream-lightest);
-  border-radius: 8px;
-  display: flex; align-items: center; justify-content: center;
-  flex-shrink: 0;
-}
-
-.sidebar-logo svg { width: 18px; height: 18px; }
-
-.sidebar-brand {
-  font-family: 'Cormorant Garamond', serif;
-  font-size: 1.2rem;
-  font-weight: 600;
-  color: var(--cream-lightest);
-  letter-spacing: 0.02em;
-  line-height: 1;
-}
-
-.sidebar-brand small {
-  display: block;
-  font-family: 'DM Sans', sans-serif;
-  font-size: 0.65rem;
-  color: rgba(235,229,194,0.35);
-  font-weight: 300;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  margin-top: 2px;
-}
-
-.sidebar-nav { padding: 1rem 0; flex: 1; }
-
-.sidebar-section-label {
-  padding: 0.75rem 1.5rem 0.4rem;
-  font-size: 0.65rem;
-  font-weight: 500;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: rgba(185,178,138,0.4);
-}
-
-.sidebar-item {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 0.6rem 1.5rem;
-  cursor: pointer;
-  font-size: 0.845rem;
-  color: rgba(235,229,194,0.55);
-  font-weight: 400;
-  transition: color 0.15s, background 0.15s;
-  border-left: 2px solid transparent;
-  text-decoration: none;
-}
-
-.sidebar-item:hover {
-  color: var(--cream-light);
-  background: rgba(235,229,194,0.04);
-}
-
-.sidebar-item.active {
-  color: var(--cream-lightest);
-  background: rgba(248,243,217,0.07);
-  border-left-color: var(--cream-mid);
-}
-
-.sidebar-item svg { width: 16px; height: 16px; opacity: 0.7; flex-shrink: 0; }
-.sidebar-item.active svg { opacity: 1; }
-
-.sidebar-user {
-  padding: 1rem 1.5rem;
-  border-top: 1px solid rgba(235,229,194,0.08);
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.sidebar-avatar {
-  width: 32px; height: 32px;
-  border-radius: 50%;
-  background: var(--cream-dark);
-  display: flex; align-items: center; justify-content: center;
-  font-size: 0.75rem;
-  font-weight: 500;
-  color: var(--cream-lightest);
-  flex-shrink: 0;
-}
-
-.sidebar-user-info { flex: 1; }
-
-.sidebar-user-name {
-  font-size: 0.8rem;
-  font-weight: 500;
-  color: var(--cream-light);
-  line-height: 1;
-  margin-bottom: 2px;
-}
-
-.sidebar-user-role {
-  font-size: 0.65rem;
-  color: rgba(185,178,138,0.45);
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-}
-
-.sidebar-logout {
-  width: 28px; height: 28px;
-  display: flex; align-items: center; justify-content: center;
-  cursor: pointer;
-  color: rgba(185,178,138,0.35);
-  transition: color 0.15s;
-  border-radius: 6px;
-}
-
-.sidebar-logout:hover { color: var(--cream-light); background: rgba(235,229,194,0.06); }
-.sidebar-logout svg { width: 15px; height: 15px; }
-
-/* ─── MAIN CONTENT ─── */
-.main-content {
-  background: var(--surface);
-  display: flex;
-  flex-direction: column;
-  min-width: 0;
-}
-
-.page-header {
-  padding: 2.5rem 2.5rem 1.5rem;
-  border-bottom: 1px solid var(--border);
-  display: flex;
-  align-items: flex-end;
-  justify-content: space-between;
-  animation: fadeUp 0.3s ease both;
-}
-
-.page-title {
-  font-family: 'Cormorant Garamond', serif;
-  font-size: 2.2rem;
-  font-weight: 400;
-  color: var(--ink);
-  letter-spacing: -0.01em;
-  line-height: 1;
-  margin-bottom: 0.35rem;
-}
-
-.page-subtitle {
-  font-size: 0.825rem;
-  color: var(--ink-muted);
-  font-weight: 300;
-}
-
-.page-body {
-  padding: 2rem 2.5rem;
-  flex: 1;
-  animation: fadeUp 0.3s ease 0.05s both;
-}
-
-/* ─── SECTION CARDS ─── */
-.section-card {
-  background: var(--cream-lightest);
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  margin-bottom: 1.5rem;
-  overflow: hidden;
-}
-
-.section-card-header {
-  padding: 1.25rem 1.5rem;
-  border-bottom: 1px solid var(--border);
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-
-.section-card-title {
-  font-family: 'Cormorant Garamond', serif;
-  font-size: 1.1rem;
-  font-weight: 500;
-  color: var(--ink);
-}
-
-.section-card-body { padding: 1.5rem; }
-
-/* ─── STATS ─── */
-.stats-grid {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 1rem;
-  margin-bottom: 2rem;
-}
-
-.stat-card {
-  background: var(--cream-lightest);
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  padding: 1.25rem 1.5rem;
-  position: relative;
-  overflow: hidden;
-}
-
-.stat-card::after {
-  content: '';
-  position: absolute;
-  bottom: -20px; right: -20px;
-  width: 80px; height: 80px;
-  border-radius: 50%;
-  background: var(--cream-light);
-  opacity: 0.3;
-}
-
-.stat-label {
-  font-size: 0.65rem;
-  font-weight: 500;
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-  color: var(--ink-muted);
-  margin-bottom: 0.6rem;
-}
-
-.stat-value {
-  font-family: 'Cormorant Garamond', serif;
-  font-size: 2.4rem;
-  font-weight: 500;
-  color: var(--ink);
-  line-height: 1;
-  margin-bottom: 0.3rem;
-}
-
-.stat-desc {
-  font-size: 0.75rem;
-  color: var(--ink-muted);
-  font-weight: 300;
-}
-
-.stat-icon {
-  position: absolute;
-  top: 1.25rem; right: 1.25rem;
-  width: 32px; height: 32px;
-  background: var(--cream-light);
-  border-radius: 8px;
-  display: flex; align-items: center; justify-content: center;
-  z-index: 1;
-}
-
-.stat-icon svg { width: 16px; height: 16px; color: var(--cream-dark); }
-
-/* ─── VECTOR STORE ─── */
-.vector-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 1rem;
-}
-
-.vector-item {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 10px;
-  padding: 1rem 1.25rem;
-}
-
-.vector-item-label {
-  font-size: 0.65rem;
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-  color: var(--ink-muted);
-  font-weight: 500;
-  margin-bottom: 0.5rem;
-}
-
-.vector-item-value {
-  font-family: 'Cormorant Garamond', serif;
-  font-size: 1.6rem;
-  font-weight: 500;
-  color: var(--ink);
-  font-variant-numeric: tabular-nums;
-}
-
-.vector-item-value.mono {
-  font-family: 'DM Sans', sans-serif;
-  font-size: 0.875rem;
-  font-weight: 400;
-  color: var(--cream-dark);
-}
-
-/* ─── TABLE ─── */
-.data-table {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 0.825rem;
-}
-
-.data-table thead th {
-  text-align: left;
-  padding: 0.75rem 1rem;
-  font-size: 0.65rem;
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-  font-weight: 500;
-  color: var(--ink-muted);
-  border-bottom: 1px solid var(--border);
-  background: var(--surface-2);
-}
-
-.data-table tbody td {
-  padding: 0.875rem 1rem;
-  border-bottom: 1px solid var(--border);
-  color: var(--ink-soft);
-  font-weight: 300;
-}
-
-.data-table tbody tr:last-child td { border-bottom: none; }
-.data-table tbody tr:hover td { background: rgba(235,229,194,0.2); }
-
-/* ─── EMPTY STATE ─── */
-.empty-state {
-  text-align: center;
-  padding: 3rem;
-  color: var(--ink-muted);
-  font-size: 0.85rem;
-  font-weight: 300;
-}
-
-.empty-state-icon {
-  width: 48px; height: 48px;
-  margin: 0 auto 1rem;
-  opacity: 0.25;
-}
-
-/* ─── QA PAGE ─── */
-.qa-layout {
-  display: grid;
-  grid-template-columns: 1fr 340px;
-  gap: 1.5rem;
-  flex: 1;
-}
-
-.qa-main { display: flex; flex-direction: column; gap: 1.5rem; }
-
-.qa-panel {
-  background: var(--cream-lightest);
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  overflow: hidden;
-}
-
-.qa-panel-header {
-  padding: 1.25rem 1.5rem;
-  border-bottom: 1px solid var(--border);
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.qa-panel-icon {
-  width: 28px; height: 28px;
-  background: var(--cream-light);
-  border-radius: 7px;
-  display: flex; align-items: center; justify-content: center;
-}
-
-.qa-panel-icon svg { width: 14px; height: 14px; color: var(--cream-dark); }
-
-.qa-panel-title {
-  font-family: 'Cormorant Garamond', serif;
-  font-size: 1.1rem;
-  font-weight: 500;
-  color: var(--ink);
-}
-
-.qa-textarea {
-  width: 100%;
-  min-height: 140px;
-  background: transparent;
-  border: none;
-  padding: 1.25rem 1.5rem;
-  font-family: 'DM Sans', sans-serif;
-  font-size: 0.875rem;
-  color: var(--ink);
-  outline: none;
-  resize: none;
-  font-weight: 300;
-  line-height: 1.6;
-}
-
-.qa-textarea::placeholder { color: var(--ink-muted); opacity: 0.5; }
-
-.qa-footer {
-  padding: 1rem 1.5rem;
-  border-top: 1px solid var(--border);
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-
-.qa-hint {
-  font-size: 0.75rem;
-  color: var(--ink-muted);
-  font-weight: 300;
-}
-
-.qa-hint kbd {
-  background: var(--surface-2);
-  border: 1px solid var(--border-strong);
-  border-radius: 4px;
-  padding: 2px 6px;
-  font-family: 'DM Sans', sans-serif;
-  font-size: 0.7rem;
-}
-
-/* ─── UPLOAD ─── */
-.upload-zone {
-  border: 1.5px dashed var(--border-strong);
-  border-radius: 10px;
-  padding: 2.5rem 1.5rem;
-  text-align: center;
-  cursor: pointer;
-  transition: border-color 0.2s, background 0.2s;
-  margin: 1rem 1.5rem 0;
-}
-
-.upload-zone:hover {
-  border-color: var(--cream-dark);
-  background: rgba(235,229,194,0.3);
-}
-
-.upload-icon {
-  width: 44px; height: 44px;
-  margin: 0 auto 0.75rem;
-  background: var(--cream-light);
-  border-radius: 10px;
-  display: flex; align-items: center; justify-content: center;
-}
-
-.upload-icon svg { width: 20px; height: 20px; color: var(--cream-dark); }
-
-.upload-title {
-  font-size: 0.875rem;
-  font-weight: 500;
-  color: var(--ink);
-  margin-bottom: 0.25rem;
-}
-
-.upload-subtitle {
-  font-size: 0.75rem;
-  color: var(--ink-muted);
-  font-weight: 300;
-}
-
-.checkbox-row {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 0.875rem 1.5rem;
-  font-size: 0.8rem;
-  color: var(--ink-muted);
-  font-weight: 300;
-}
-
-input[type="checkbox"] {
-  width: 14px; height: 14px;
-  accent-color: var(--cream-dark);
-}
-
-.doc-list-label {
-  padding: 1rem 1.5rem 0.4rem;
-  font-size: 0.65rem;
-  font-weight: 500;
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-  color: var(--ink-muted);
-  border-top: 1px solid var(--border);
-}
-
-/* ─── FLASH MESSAGES ─── */
-.flash-msg {
-  padding: 0.75rem 1rem;
-  border-radius: 8px;
-  margin-bottom: 1rem;
-  font-size: 0.825rem;
-  font-weight: 400;
-}
-.flash-success { background: rgba(80,75,56,0.08); border: 1px solid var(--border-strong); color: var(--cream-dark); }
-.flash-error   { background: rgba(180,50,50,0.08); border: 1px solid rgba(180,50,50,0.2); color: #8B3333; }
-
-/* ─── CONFIDENCE BADGE ─── */
-.confidence-badge {
-  margin-left: auto;
-  font-size: 0.7rem;
-  font-weight: 500;
-  padding: 3px 8px;
-  border-radius: 20px;
-  letter-spacing: 0.04em;
-}
-.conf-high { background: rgba(40,100,60,0.1); color: #2a6040; }
-.conf-mid  { background: rgba(140,100,20,0.1); color: #7a5a10; }
-.conf-low  { background: rgba(180,50,50,0.1); color: #8B3333; }
-
-/* ─── CONFLICT BANNER ─── */
-.conflict-banner {
-  margin: 0 1.5rem 1.5rem;
-  background: rgba(180,50,50,0.05);
-  border: 1px solid rgba(180,50,50,0.2);
-  border-radius: 8px;
-  padding: 1rem;
-}
-.conflict-banner-header {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  color: #8B3333;
-  font-size: 0.825rem;
-  margin-bottom: 0.75rem;
-}
-.conflict-item {
-  padding: 0.5rem 0;
-  border-top: 1px solid rgba(180,50,50,0.1);
-  font-size: 0.8rem;
-}
-.conflict-badge {
-  display: inline-flex;
-  align-items: center;
-  padding: 1px 6px;
-  border-radius: 3px;
-  font-size: 0.65rem;
-  font-weight: 600;
-  letter-spacing: 0.06em;
-  margin-right: 6px;
-}
-.severity-high   { background: rgba(180,50,50,0.15); color: #8B3333; }
-.severity-medium { background: rgba(150,100,20,0.15); color: #7a5a10; }
-.severity-low    { background: rgba(80,75,56,0.12); color: var(--cream-dark); }
-.conflict-type {
-  font-size: 0.7rem;
-  font-weight: 500;
-  color: var(--ink-muted);
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-  margin-right: 8px;
-}
-.conflict-desc {
-  margin-top: 4px;
-  font-size: 0.8rem;
-  color: var(--ink-muted);
-  font-weight: 300;
-  line-height: 1.5;
-}
-
-/* ─── HALLUCINATION ROW ─── */
-.hallucination-row {
-  padding: 0.75rem 1.5rem;
-  border-top: 1px solid var(--border);
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 0.775rem;
-}
-.hall-label { color: var(--ink-muted); font-weight: 300; }
-.hall-status {
-  font-size: 0.65rem;
-  font-weight: 600;
-  padding: 2px 8px;
-  border-radius: 20px;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-}
-.hall-verified  { background: rgba(40,100,60,0.1); color: #2a6040; }
-.hall-flagged   { background: rgba(180,50,50,0.1); color: #8B3333; }
-.hall-no_claims { background: rgba(80,75,56,0.08); color: var(--ink-muted); }
-
-/* ─── DRAG OVER ─── */
-.upload-zone.drag-over {
-  border-color: var(--cream-dark);
-  background: rgba(235,229,194,0.4);
-}
-
-/* ─── NADE AI BRAND LOGO ─── */
-.sidebar-header { align-items: flex-start; justify-content: space-between; gap: 8px; }
-.sidebar-brand-block { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
-.sidebar-wordmark {
-  width: 116px; height: auto; color: var(--cream-lightest); display: block;
-}
-.sidebar-brand-sub {
-  font-family: 'DM Sans', sans-serif; font-size: 0.62rem;
-  color: rgba(235,229,194,0.35); font-weight: 300;
-  letter-spacing: 0.14em; text-transform: uppercase;
-}
-.auth-wordmark { width: 150px; height: auto; color: var(--cream-lightest); display: block; }
-.qa-panel-icon svg { width: 18px; height: 18px; }
-.form-split { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; align-items: start; }
-
-/* ─── NAV CHROME (drawer / collapse) ─── */
-.app-layout { transition: grid-template-columns .25s ease; }
-.sidebar { transition: transform .28s ease; }
-
-/* Mobile top app bar + overlay — hidden on desktop */
-.mobile-topbar { display: none; }
-.nav-overlay {
-  position: fixed; inset: 0; background: rgba(0,0,0,.45);
-  opacity: 0; visibility: hidden; transition: opacity .25s, visibility .25s; z-index: 65;
-}
-
-/* Desktop collapse button (chevron in sidebar header) */
-.nav-collapse-btn {
-  margin-left: auto; width: 30px; height: 30px; flex-shrink: 0;
-  display: inline-flex; align-items: center; justify-content: center;
-  background: rgba(235,229,194,.08); border: none; border-radius: 7px;
-  color: var(--cream-light); cursor: pointer; transition: background .15s;
-}
-.nav-collapse-btn:hover { background: rgba(235,229,194,.16); }
-.nav-collapse-btn svg { width: 16px; height: 16px; }
-
-/* Floating "open menu" button — only when collapsed/closed */
-.nav-fab {
-  position: fixed; left: 14px; top: 14px; z-index: 60;
-  width: 42px; height: 42px; display: none;
-  align-items: center; justify-content: center;
-  background: var(--ink); color: var(--cream-lightest);
-  border: none; border-radius: 10px; cursor: pointer;
-  box-shadow: 0 4px 16px rgba(0,0,0,.2);
-}
-.nav-fab svg { width: 20px; height: 20px; }
-
-/* Desktop: sidebar hidden */
-body.nav-collapsed .app-layout { grid-template-columns: 0 1fr; }
-body.nav-collapsed .sidebar { transform: translateX(-100%); }
-body.nav-collapsed .nav-fab { display: flex; }
-
-/* ─── TABLET (≤960px): narrower sidebar, stacked QA ─── */
-@media (max-width: 960px) {
-  .app-layout { grid-template-columns: 200px 1fr; }
-  .qa-layout { grid-template-columns: 1fr !important; }
-  .stats-grid { grid-template-columns: repeat(2, 1fr) !important; }
-}
-
-/* ─── PHONES & SMALL TABLETS (≤768px): off-canvas drawer ─── */
-@media (max-width: 768px) {
-  .app-layout { grid-template-columns: 1fr; }
-
-  .mobile-topbar {
-    display: flex; align-items: center; gap: 10px;
-    position: fixed; top: 0; left: 0; right: 0; height: 56px;
-    padding: 0 12px; background: var(--ink); z-index: 60;
-    border-bottom: 1px solid rgba(235,229,194,.08);
-  }
-  .topbar-wordmark { width: 86px; height: auto; color: var(--cream-lightest); }
-  .nav-toggle {
-    width: 40px; height: 40px; display: inline-flex; flex-shrink: 0;
-    align-items: center; justify-content: center;
-    background: transparent; border: none; color: var(--cream-lightest); cursor: pointer;
-  }
-
-  /* sidebar becomes a slide-in drawer */
-  .sidebar {
-    position: fixed; top: 0; left: 0; height: 100vh;
-    width: min(82vw, 300px); transform: translateX(-100%); z-index: 70;
-  }
-  body.nav-open .sidebar { transform: none; }
-  body.nav-open .nav-overlay { opacity: 1; visibility: visible; }
-
-  /* drawer is the only menu mechanism on mobile */
-  .nav-collapse-btn, .nav-fab { display: none !important; }
-  body.nav-collapsed .sidebar { transform: translateX(-100%); }
-
-  .sidebar-header { flex-direction: column; align-items: flex-start; }
-  .sidebar-item { padding: 0.85rem 1.5rem; }   /* bigger touch targets */
-
-  .main-content { padding: calc(56px + 1rem) 1rem 5rem !important; min-width: 0; overflow-x: hidden; }
-  .page-title { font-size: 1.4rem; }
-  .stats-grid, .vector-grid { grid-template-columns: 1fr !important; }
-  .form-split { grid-template-columns: 1fr !important; }
-
-  /* tables become stacked cards (no horizontal scroll) */
-  .data-table { min-width: 0; }
-  .data-table thead { display: none; }
-  .data-table, .data-table tbody, .data-table tr, .data-table td { display: block; width: 100%; }
-  .data-table tr {
-    border: 1px solid var(--border); border-radius: 10px;
-    margin-bottom: 0.75rem; padding: 0.35rem 0.9rem; background: var(--cream-lightest);
-  }
-  .data-table td {
-    display: flex; justify-content: space-between; align-items: center; gap: 1rem;
-    padding: 0.45rem 0; border: none; text-align: right; max-width: none !important; white-space: normal !important;
-  }
-  .data-table td::before {
-    content: attr(data-label); font-weight: 500; color: var(--ink-muted);
-    text-align: left; flex-shrink: 0;
-  }
-  .data-table td:last-child { justify-content: flex-end; }
-
-  .qa-footer { flex-direction: column; align-items: stretch; gap: 0.6rem; }
-  .btn-ask { width: 100%; justify-content: center; }
-}
-
-/* ─── AUTH responsive ─── */
-@media (max-width: 900px) {
-  .auth-layout { grid-template-columns: 1fr; }
-  .auth-panel-left { display: none; }
-  .auth-panel-right { min-height: 100vh; }
-}
-
-/* ─── VERY SMALL (≤480px) ─── */
-@media (max-width: 480px) {
-  .stats-grid, .vector-grid { grid-template-columns: 1fr !important; }
-  .auth-form-container { max-width: 100%; }
-}
-
-/* ─── MULTI-PAGE SCAN ─── */
-.scan-card {
-  margin: 0 1.5rem 1rem;
-  padding: 1rem;
-  border: 1px dashed var(--border-strong);
-  border-radius: 12px;
-  background: var(--surface-2);
-}
-.scan-card-head {
-  display: flex; align-items: center; gap: 8px;
-  font-size: 0.8rem; font-weight: 500; color: var(--ink-soft);
-  margin-bottom: 0.75rem;
-}
-.scan-card-head svg { color: var(--cream-dark); }
-.scan-thumbs {
-  display: grid; grid-template-columns: repeat(auto-fill, minmax(72px, 1fr));
-  gap: 8px; margin-bottom: 0.75rem;
-}
-.scan-thumbs:empty { display: none; }
-.scan-thumb {
-  position: relative; aspect-ratio: 3/4; border-radius: 8px; overflow: hidden;
-  border: 2px solid transparent; background: var(--cream-light);
-}
-.scan-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
-.scan-thumb.failed { border-color: #B43232; }
-.scan-thumb-no {
-  position: absolute; top: 3px; left: 4px; font-size: 0.65rem; font-weight: 600;
-  color: #fff; background: rgba(0,0,0,0.55); border-radius: 4px; padding: 0 5px;
-}
-.scan-thumb-x {
-  position: absolute; top: 2px; right: 3px; width: 18px; height: 18px;
-  border: none; border-radius: 50%; background: rgba(0,0,0,0.55); color: #fff;
-  font-size: 14px; line-height: 1; cursor: pointer;
-}
-.scan-thumb-re {
-  position: absolute; bottom: 0; left: 0; right: 0; border: none;
-  background: #B43232; color: #fff; font-size: 0.6rem; padding: 3px 0; cursor: pointer;
-}
-.scan-btn { width: 100%; justify-content: center; margin-bottom: 0.6rem; }
-.scan-name { margin-bottom: 0.6rem; }
-
-/* ─── AUTH LAYOUT ─── */
-.auth-layout {
-  width: 100%;
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  min-height: 100vh;
-}
-
-.auth-panel-left {
-  background: var(--ink);
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  padding: 3rem;
-  position: relative;
-  overflow: hidden;
-}
-
-.auth-panel-left::before {
-  content: '';
-  position: absolute;
-  top: -100px; right: -100px;
-  width: 400px; height: 400px;
-  border-radius: 50%;
-  background: radial-gradient(circle, rgba(185,178,138,0.12) 0%, transparent 70%);
-  pointer-events: none;
-}
-
-.auth-panel-left::after {
-  content: '';
-  position: absolute;
-  bottom: -80px; left: -80px;
-  width: 320px; height: 320px;
-  border-radius: 50%;
-  background: radial-gradient(circle, rgba(235,229,194,0.08) 0%, transparent 70%);
-  pointer-events: none;
-}
-
-.auth-brand {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  z-index: 1;
-}
-
-.auth-logo {
-  width: 40px; height: 40px;
-  background: var(--cream-lightest);
-  border-radius: 10px;
-  display: flex; align-items: center; justify-content: center;
-}
-
-.auth-logo svg { width: 22px; height: 22px; }
-
-.auth-brand-name {
-  font-family: 'Cormorant Garamond', serif;
-  font-size: 1.5rem;
-  font-weight: 600;
-  color: var(--cream-lightest);
-  letter-spacing: 0.02em;
-}
-
-.auth-tagline { z-index: 1; }
-
-.auth-tagline h1 {
-  font-family: 'Cormorant Garamond', serif;
-  font-size: 3.2rem;
-  font-weight: 300;
-  line-height: 1.15;
-  color: var(--cream-lightest);
-  letter-spacing: -0.01em;
-  margin-bottom: 1rem;
-}
-
-.auth-tagline h1 em {
-  font-style: italic;
-  color: var(--cream-mid);
-}
-
-.auth-tagline p {
-  font-size: 0.875rem;
-  color: rgba(248,243,217,0.5);
-  font-weight: 300;
-  line-height: 1.6;
-  max-width: 280px;
-}
-
-.auth-ornament {
-  position: absolute;
-  right: 2rem; top: 50%;
-  transform: translateY(-50%);
-  opacity: 0.06;
-  z-index: 0;
-}
-
-.auth-ornament svg { width: 200px; height: 200px; }
-
-.auth-panel-right {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: var(--cream-lightest);
-  padding: 2rem;
-}
-
-.auth-form-container {
-  width: 100%;
-  max-width: 380px;
-  animation: fadeUp 0.3s ease both;
-}
-
-.auth-form-title {
-  font-family: 'Cormorant Garamond', serif;
-  font-size: 2rem;
-  font-weight: 500;
-  color: var(--ink);
-  margin-bottom: 0.4rem;
-}
-
-.auth-form-subtitle {
-  font-size: 0.825rem;
-  color: var(--ink-muted);
-  margin-bottom: 2.5rem;
-  font-weight: 300;
-}
-
-.auth-footer {
-  text-align: center;
-  margin-top: 1.75rem;
-  font-size: 0.825rem;
-  color: var(--ink-muted);
-}
-
-.auth-footer a {
-  color: var(--cream-dark);
-  text-decoration: none;
-  font-weight: 500;
-  border-bottom: 1px solid var(--border-strong);
-  padding-bottom: 1px;
-}
-
-/* ─── RESPONSIVE: phones / narrow screens ─── */
-@media (max-width: 820px) {
-  .auth-layout { grid-template-columns: 1fr; }
-  .auth-panel-left { display: none !important; }   /* only show the form on phones */
-  .auth-panel-right { min-height: 100vh; padding: 1.5rem; }
-  .auth-form-container { max-width: 400px; }
-  .auth-form-title { font-size: 1.75rem; }
-}
-
-/* preview-only chrome */
-#preview-switch {
-  position: fixed; bottom: 16px; left: 50%; transform: translateX(-50%);
-  display: flex; gap: 4px; background: var(--ink); padding: 6px;
-  border-radius: 12px; z-index: 9999; box-shadow: 0 8px 30px rgba(0,0,0,.25);
-  max-width: 94vw; overflow-x: auto;
-}
-#preview-switch button {
-  border: none; background: transparent; color: rgba(235,229,194,.6);
-  font: 500 .75rem 'DM Sans',sans-serif; padding: 7px 12px; border-radius: 8px;
-  cursor: pointer; white-space: nowrap;
-}
-#preview-switch button.active { background: var(--cream-lightest); color: var(--ink); }
+:root{
+  --cl:#F8F3D9;--cl-l:#EBE5C2;--cl-m:#B9B28A;--cl-d:#504B38;
+  --ink:#1A1814;--ink-s:#2E2B22;--ink-m:#6B6554;
+  --surf:#FDFAF0;--surf2:#F3EDD6;
+  --bdr:rgba(80,75,56,0.15);--bdr-s:rgba(80,75,56,0.3);
+  --sw:240px;
+  --red:#8B3333;--red-bg:rgba(180,50,50,.07);--red-bdr:rgba(180,50,50,.22);
+  --grn:#2a6040;--grn-bg:rgba(40,100,60,.08);
+  --amb:#7a5a10;--amb-bg:rgba(140,100,20,.08);
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+html{-webkit-text-size-adjust:100%;}
+body{font-family:'DM Sans',sans-serif;background:var(--cl);color:var(--ink);min-height:100vh;overflow-x:hidden;}
+::-webkit-scrollbar{width:5px}::-webkit-scrollbar-thumb{background:var(--bdr-s);border-radius:3px}
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes barIn{from{width:0}to{width:var(--w)}}
+
+/* FORMS */
+.form-group{margin-bottom:1.25rem}
+.form-label{display:block;font-size:.75rem;font-weight:500;color:var(--cl-d);margin-bottom:.5rem;text-transform:uppercase;letter-spacing:.08em}
+.form-label span{font-weight:300;text-transform:none;letter-spacing:0;color:var(--ink-m)}
+.form-input{width:100%;height:48px;background:var(--surf);border:1px solid var(--bdr-s);border-radius:8px;padding:0 1rem;font-family:'DM Sans',sans-serif;font-size:.9rem;color:var(--ink);outline:none;transition:border-color .2s;-webkit-appearance:none}
+.form-input::placeholder{color:var(--ink-m);opacity:.5}
+.form-input:focus{border-color:var(--cl-d)}
+.form-select{width:100%;height:48px;background:var(--surf);border:1px solid var(--bdr-s);border-radius:8px;padding:0 1rem;font-family:'DM Sans',sans-serif;font-size:.9rem;color:var(--ink);outline:none;cursor:pointer;-webkit-appearance:none;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23504B38' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 1rem center}
+
+/* BUTTONS */
+.btn-primary{width:100%;height:50px;background:var(--ink);color:var(--cl);border:none;border-radius:8px;font-family:'DM Sans',sans-serif;font-size:.875rem;font-weight:500;cursor:pointer;transition:background .2s;margin-top:.5rem;-webkit-appearance:none}
+.btn-primary:hover{background:var(--ink-s)}
+.btn-secondary{height:44px;padding:0 1rem;background:transparent;border:1px solid var(--bdr-s);border-radius:7px;font-family:'DM Sans',sans-serif;font-size:.775rem;font-weight:500;color:var(--ink-m);cursor:pointer;display:inline-flex;align-items:center;gap:6px;transition:all .15s;-webkit-appearance:none}
+.btn-secondary:hover{border-color:var(--cl-d);color:var(--cl-d)}
+.btn-secondary svg{width:14px;height:14px}
+.btn-danger{height:36px;padding:0 1rem;background:transparent;border:1px solid rgba(180,50,50,.2);border-radius:7px;font-family:'DM Sans',sans-serif;font-size:.775rem;font-weight:500;color:var(--red);cursor:pointer;display:inline-flex;align-items:center;gap:6px;transition:all .15s;-webkit-appearance:none}
+.btn-danger:hover{background:rgba(180,50,50,.06)}
+.btn-danger svg{width:14px;height:14px}
+.btn-refresh{display:inline-flex;align-items:center;gap:6px;padding:.5rem 1rem;border:1px solid var(--bdr-s);border-radius:7px;background:var(--cl);font-family:'DM Sans',sans-serif;font-size:.775rem;font-weight:500;color:var(--ink-m);cursor:pointer;transition:all .15s;-webkit-appearance:none}
+.btn-refresh svg{width:13px;height:13px}
+.btn-ask{height:44px;padding:0 1.5rem;background:var(--ink);color:var(--cl);border:none;border-radius:8px;font-family:'DM Sans',sans-serif;font-size:.825rem;font-weight:500;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;transition:background .2s;-webkit-appearance:none;flex-shrink:0}
+.btn-ask:hover{background:var(--ink-s)}
+.btn-ask svg{width:14px;height:14px}
+.btn-upload{margin:0 1.5rem 1.5rem;width:calc(100% - 3rem);height:48px;background:var(--cl-l);border:1px solid var(--bdr-s);border-radius:8px;font-family:'DM Sans',sans-serif;font-size:.825rem;font-weight:500;color:var(--cl-d);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;transition:background .2s;-webkit-appearance:none}
+.btn-upload:hover{background:var(--cl-m);color:var(--cl)}
+.btn-upload svg{width:14px;height:14px}
+
+/* BADGES */
+.badge{display:inline-flex;align-items:center;padding:2px 8px;border-radius:4px;font-size:.7rem;font-weight:500;text-transform:uppercase;letter-spacing:.06em}
+.badge-admin{background:rgba(80,75,56,.12);color:var(--cl-d)}
+.badge-user{background:rgba(185,178,138,.2);color:var(--ink-m)}
+.badge-shared{background:rgba(80,75,56,.08);color:var(--cl-d)}
+
+/* APP LAYOUT */
+.app-layout{width:100%;display:grid;grid-template-columns:var(--sw) 1fr;min-height:100vh}
+
+/* SIDEBAR */
+.sidebar{background:var(--ink);display:flex;flex-direction:column;position:sticky;top:0;height:100vh;overflow-y:auto;transition:transform .28s ease;z-index:50}
+.sidebar-header{padding:1.75rem 1.5rem 1.25rem;border-bottom:1px solid rgba(235,229,194,.08);display:flex;align-items:flex-start;justify-content:space-between;gap:8px}
+.sidebar-brand-block{display:flex;flex-direction:column;gap:4px;min-width:0}
+.sidebar-wordmark{width:116px;height:auto;color:#F8F3D9;display:block}
+.sidebar-brand-sub{font-family:'DM Sans',sans-serif;font-size:.62rem;color:rgba(235,229,194,.35);font-weight:300;letter-spacing:.14em;text-transform:uppercase}
+.nav-collapse-btn{width:30px;height:30px;flex-shrink:0;display:inline-flex;align-items:center;justify-content:center;background:rgba(235,229,194,.08);border:none;border-radius:7px;color:#EBE5C2;cursor:pointer}
+.nav-collapse-btn svg{width:16px;height:16px}
+.sidebar-nav{padding:1rem 0;flex:1}
+.sidebar-section-label{padding:.75rem 1.5rem .4rem;font-size:.65rem;font-weight:500;letter-spacing:.12em;text-transform:uppercase;color:rgba(185,178,138,.4)}
+.sidebar-item{display:flex;align-items:center;gap:10px;padding:.75rem 1.5rem;cursor:pointer;font-size:.845rem;color:rgba(235,229,194,.55);font-weight:400;transition:color .15s,background .15s;border-left:2px solid transparent;text-decoration:none;-webkit-tap-highlight-color:transparent}
+.sidebar-item:hover{color:#EBE5C2;background:rgba(235,229,194,.04)}
+.sidebar-item.active{color:#F8F3D9;background:rgba(248,243,217,.07);border-left-color:#B9B28A}
+.sidebar-item svg{width:16px;height:16px;opacity:.7;flex-shrink:0}
+.sidebar-item.active svg{opacity:1}
+.sidebar-user{padding:1rem 1.5rem;border-top:1px solid rgba(235,229,194,.08);display:flex;align-items:center;gap:10px}
+.sidebar-avatar{width:32px;height:32px;border-radius:50%;background:var(--cl-d);display:flex;align-items:center;justify-content:center;font-size:.75rem;font-weight:500;color:var(--cl);flex-shrink:0}
+.sidebar-user-info{flex:1;min-width:0}
+.sidebar-user-name{font-size:.8rem;font-weight:500;color:#EBE5C2;line-height:1;margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sidebar-user-role{font-size:.65rem;color:rgba(185,178,138,.45);text-transform:uppercase;letter-spacing:.08em}
+.sidebar-logout{width:32px;height:32px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:rgba(185,178,138,.35);border-radius:6px;flex-shrink:0}
+.sidebar-logout svg{width:15px;height:15px}
+
+/* MAIN */
+.main-content{background:var(--surf);display:flex;flex-direction:column;min-width:0;overflow-x:hidden}
+.page-header{padding:2.5rem 2.5rem 1.5rem;border-bottom:1px solid var(--bdr);display:flex;align-items:flex-end;justify-content:space-between;animation:fadeUp .3s ease both}
+.page-title{font-family:'Cormorant Garamond',serif;font-size:2.2rem;font-weight:400;color:var(--ink);letter-spacing:-.01em;line-height:1;margin-bottom:.35rem}
+.page-subtitle{font-size:.825rem;color:var(--ink-m);font-weight:300}
+.page-body{padding:2rem 2.5rem 6rem;flex:1;animation:fadeUp .3s ease .05s both}
+
+/* SECTION CARD */
+.section-card{background:var(--cl);border:1px solid var(--bdr);border-radius:12px;margin-bottom:1.5rem;overflow:hidden}
+.section-card-header{padding:1.25rem 1.5rem;border-bottom:1px solid var(--bdr);display:flex;align-items:center;justify-content:space-between}
+.section-card-title{font-family:'Cormorant Garamond',serif;font-size:1.1rem;font-weight:500;color:var(--ink)}
+.section-card-body{padding:1.5rem}
+
+/* STATS */
+.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;margin-bottom:2rem}
+.stat-card{background:var(--cl);border:1px solid var(--bdr);border-radius:12px;padding:1.25rem 1.5rem;position:relative;overflow:hidden}
+.stat-card::after{content:'';position:absolute;bottom:-20px;right:-20px;width:80px;height:80px;border-radius:50%;background:var(--cl-l);opacity:.3}
+.stat-label{font-size:.65rem;font-weight:500;text-transform:uppercase;letter-spacing:.1em;color:var(--ink-m);margin-bottom:.6rem}
+.stat-value{font-family:'Cormorant Garamond',serif;font-size:2.4rem;font-weight:500;color:var(--ink);line-height:1;margin-bottom:.3rem}
+.stat-desc{font-size:.75rem;color:var(--ink-m);font-weight:300}
+.stat-icon{position:absolute;top:1.25rem;right:1.25rem;width:32px;height:32px;background:var(--cl-l);border-radius:8px;display:flex;align-items:center;justify-content:center;z-index:1}
+.stat-icon svg{width:16px;height:16px;color:var(--cl-d)}
+
+/* VECTOR */
+.vector-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem}
+.vector-item{background:var(--surf);border:1px solid var(--bdr);border-radius:10px;padding:1rem 1.25rem}
+.vector-item-label{font-size:.65rem;text-transform:uppercase;letter-spacing:.1em;color:var(--ink-m);font-weight:500;margin-bottom:.5rem}
+.vector-item-value{font-family:'Cormorant Garamond',serif;font-size:1.6rem;font-weight:500;color:var(--ink)}
+.vector-item-value.mono{font-family:'DM Sans',sans-serif;font-size:.8rem;font-weight:400;color:var(--cl-d);word-break:break-all}
+
+/* TABLE */
+.data-table{width:100%;border-collapse:collapse;font-size:.825rem}
+.data-table thead th{text-align:left;padding:.75rem 1rem;font-size:.65rem;text-transform:uppercase;letter-spacing:.1em;font-weight:500;color:var(--ink-m);border-bottom:1px solid var(--bdr);background:var(--surf2)}
+.data-table tbody td{padding:.875rem 1rem;border-bottom:1px solid var(--bdr);color:var(--ink-s);font-weight:300}
+.data-table tbody tr:last-child td{border-bottom:none}
+.data-table tbody tr:hover td{background:rgba(235,229,194,.2)}
+
+/* EMPTY */
+.empty-state{text-align:center;padding:3rem;color:var(--ink-m);font-size:.85rem;font-weight:300}
+.empty-state-icon{width:48px;height:48px;margin:0 auto 1rem;opacity:.25}
+
+/* QA */
+.qa-layout{display:grid;grid-template-columns:1fr 340px;gap:1.5rem}
+.qa-main{display:flex;flex-direction:column;gap:1.5rem}
+.qa-panel{background:var(--cl);border:1px solid var(--bdr);border-radius:12px;overflow:hidden}
+.qa-panel-header{padding:1.1rem 1.5rem;border-bottom:1px solid var(--bdr);display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.qa-panel-icon{width:28px;height:28px;background:var(--cl-l);border-radius:7px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.qa-panel-icon svg{width:18px;height:18px;color:var(--cl-d)}
+.qa-panel-title{font-family:'Cormorant Garamond',serif;font-size:1.1rem;font-weight:500;color:var(--ink)}
+.qa-textarea{width:100%;min-height:100px;background:transparent;border:none;padding:1.25rem 1.5rem;font-family:'DM Sans',sans-serif;font-size:.875rem;color:var(--ink);outline:none;resize:none;font-weight:300;line-height:1.6;-webkit-appearance:none}
+.qa-textarea::placeholder{color:var(--ink-m);opacity:.5}
+.qa-footer{padding:1rem 1.5rem;border-top:1px solid var(--bdr);display:flex;align-items:center;justify-content:space-between;gap:.75rem;flex-wrap:wrap}
+.qa-hint{font-size:.75rem;color:var(--ink-m);font-weight:300}
+.qa-hint kbd{background:var(--surf2);border:1px solid var(--bdr-s);border-radius:4px;padding:2px 6px;font-family:'DM Sans',sans-serif;font-size:.7rem}
+
+/* UPLOAD */
+.upload-zone{border:1.5px dashed var(--bdr-s);border-radius:10px;padding:2rem 1.5rem;text-align:center;cursor:pointer;transition:border-color .2s,background .2s;margin:1rem 1.5rem 0;display:block}
+.upload-zone:hover{border-color:var(--cl-d);background:rgba(235,229,194,.3)}
+.upload-icon{width:44px;height:44px;margin:0 auto .75rem;background:var(--cl-l);border-radius:10px;display:flex;align-items:center;justify-content:center}
+.upload-icon svg{width:20px;height:20px;color:var(--cl-d)}
+.upload-title{font-size:.875rem;font-weight:500;color:var(--ink);margin-bottom:.25rem}
+.upload-subtitle{font-size:.75rem;color:var(--ink-m);font-weight:300}
+.checkbox-row{display:flex;align-items:center;gap:8px;padding:.875rem 1.5rem;font-size:.8rem;color:var(--ink-m);font-weight:300}
+input[type="checkbox"]{width:18px;height:18px;accent-color:var(--cl-d);flex-shrink:0}
+.doc-list-label{padding:1rem 1.5rem .4rem;font-size:.65rem;font-weight:500;text-transform:uppercase;letter-spacing:.1em;color:var(--ink-m);border-top:1px solid var(--bdr)}
+
+/* FLASH */
+.flash-msg{padding:.75rem 1rem;border-radius:8px;margin-bottom:1rem;font-size:.825rem}
+.flash-success{background:rgba(80,75,56,.08);border:1px solid var(--bdr-s);color:var(--cl-d)}
+.flash-error{background:rgba(180,50,50,.08);border:1px solid rgba(180,50,50,.2);color:var(--red)}
+
+/* CONFIDENCE */
+.conf-badge{font-size:.7rem;font-weight:500;padding:3px 10px;border-radius:20px;letter-spacing:.04em}
+.conf-hi{background:var(--grn-bg);color:var(--grn)}
+.conf-lo{background:var(--red-bg);color:var(--red)}
+.conf-mid{background:var(--amb-bg);color:var(--amb)}
+
+/* FORM SPLIT */
+.form-split{display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;align-items:start}
+
+/* AUTH */
+.auth-layout{width:100%;display:grid;grid-template-columns:1fr 1fr;min-height:100vh}
+.auth-panel-left{background:var(--ink);display:flex;flex-direction:column;justify-content:space-between;padding:3rem;position:relative;overflow:hidden}
+.auth-panel-left::before{content:'';position:absolute;top:-100px;right:-100px;width:400px;height:400px;border-radius:50%;background:radial-gradient(circle,rgba(185,178,138,.12) 0%,transparent 70%);pointer-events:none}
+.auth-tagline h1{font-family:'Cormorant Garamond',serif;font-size:3.2rem;font-weight:300;line-height:1.15;color:var(--cl);letter-spacing:-.01em;margin-bottom:1rem}
+.auth-tagline h1 em{font-style:italic;color:var(--cl-m)}
+.auth-tagline p{font-size:.875rem;color:rgba(248,243,217,.5);font-weight:300;line-height:1.6;max-width:280px}
+.auth-ornament{position:absolute;right:2rem;top:50%;transform:translateY(-50%);opacity:.06;z-index:0}
+.auth-panel-right{display:flex;align-items:center;justify-content:center;background:var(--cl);padding:2rem}
+.auth-form-container{width:100%;max-width:380px;animation:fadeUp .3s ease both}
+.auth-form-title{font-family:'Cormorant Garamond',serif;font-size:2rem;font-weight:500;color:var(--ink);margin-bottom:.4rem}
+.auth-form-subtitle{font-size:.825rem;color:var(--ink-m);margin-bottom:2.5rem;font-weight:300}
+.auth-footer{text-align:center;margin-top:1.75rem;font-size:.825rem;color:var(--ink-m)}
+.auth-footer a{color:var(--cl-d);text-decoration:none;font-weight:500;border-bottom:1px solid var(--bdr-s);padding-bottom:1px}
+.auth-wordmark{width:150px;height:auto;color:var(--cl);display:block}
+
+/* MOBILE TOPBAR */
+.mobile-topbar{display:none;align-items:center;gap:10px;position:fixed;top:0;left:0;right:0;height:56px;padding:0 16px;background:var(--ink);z-index:60;border-bottom:1px solid rgba(235,229,194,.08)}
+.topbar-wordmark{width:86px;height:auto;color:var(--cl)}
+.nav-toggle{width:44px;height:44px;display:inline-flex;flex-shrink:0;align-items:center;justify-content:center;background:transparent;border:none;color:var(--cl);cursor:pointer;-webkit-tap-highlight-color:transparent}
+.nav-overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);opacity:0;visibility:hidden;transition:opacity .25s,visibility .25s;z-index:65}
+.nav-fab{position:fixed;left:14px;top:14px;z-index:60;width:42px;height:42px;display:none;align-items:center;justify-content:center;background:var(--ink);color:var(--cl);border:none;border-radius:10px;cursor:pointer;box-shadow:0 4px 16px rgba(0,0,0,.2)}
+.nav-fab svg{width:20px;height:20px}
+body.nav-collapsed .app-layout{grid-template-columns:0 1fr}
+body.nav-collapsed .sidebar{transform:translateX(-100%)}
+body.nav-collapsed .nav-fab{display:flex}
+
+/* SCAN */
+.scan-card{margin:0 1.5rem 1rem;padding:1rem;border:1px dashed var(--bdr-s);border-radius:12px;background:var(--surf2)}
+.scan-card-head{display:flex;align-items:center;gap:8px;font-size:.8rem;font-weight:500;color:var(--ink-s);margin-bottom:.75rem}
+.scan-thumbs{display:grid;grid-template-columns:repeat(auto-fill,minmax(64px,1fr));gap:8px;margin-bottom:.75rem}
+.scan-thumbs:empty{display:none}
+.scan-thumb{position:relative;aspect-ratio:3/4;border-radius:8px;overflow:hidden;border:2px solid transparent;background:var(--cl-l)}
+.scan-thumb img{width:100%;height:100%;object-fit:cover;display:block}
+.scan-thumb-no{position:absolute;top:3px;left:4px;font-size:.65rem;font-weight:600;color:#fff;background:rgba(0,0,0,.55);border-radius:4px;padding:0 5px}
+.scan-thumb-x{position:absolute;top:2px;right:3px;width:22px;height:22px;border:none;border-radius:50%;background:rgba(0,0,0,.55);color:#fff;font-size:14px;line-height:1;cursor:pointer}
+.scan-btn{width:100%;justify-content:center;margin-bottom:.6rem}
+.scan-name{margin-bottom:.6rem}
+
+/* ── DEMO SECTION ── */
+.demo-divider{display:flex;align-items:center;gap:1rem;margin:2rem 0 1.5rem}
+.demo-divider-line{flex:1;height:1px;background:var(--bdr)}
+.demo-divider-label{font-size:.65rem;font-weight:500;text-transform:uppercase;letter-spacing:.14em;color:var(--ink-m);white-space:nowrap;display:flex;align-items:center;gap:.4rem}
+.demo-divider-dot{width:6px;height:6px;border-radius:50%;background:var(--cl-m)}
+
+.scenario-nav{display:flex;gap:.45rem;margin-bottom:1.25rem;flex-wrap:wrap}
+.s-pill{padding:.4rem .9rem;border-radius:20px;border:1px solid var(--bdr-s);background:transparent;font-family:'DM Sans',sans-serif;font-size:.75rem;font-weight:400;color:var(--ink-m);cursor:pointer;transition:all .2s;display:flex;align-items:center;gap:5px;-webkit-tap-highlight-color:transparent}
+.s-pill:hover{border-color:var(--cl-d);color:var(--cl-d)}
+.s-pill.active{background:var(--ink);color:var(--cl);border-color:var(--ink)}
+.s-pill .dot{width:6px;height:6px;border-radius:50%;flex-shrink:0}
+.dot-r{background:#E57373}.dot-a{background:#FFB74D}.dot-g{background:#81C784}
+
+.demo-q-card{background:var(--surf2);border:1px solid var(--bdr);border-radius:10px;padding:.9rem 1.25rem;margin-bottom:.9rem;font-size:.85rem;font-weight:300;color:var(--ink-s);line-height:1.6;font-style:italic;display:flex;align-items:flex-start;gap:.6rem}
+.demo-q-card svg{width:15px;height:15px;color:var(--cl-m);flex-shrink:0;margin-top:2px}
+
+.run-btn{display:inline-flex;align-items:center;gap:7px;padding:.6rem 1.25rem;background:var(--ink);color:var(--cl);border:none;border-radius:9px;font-family:'DM Sans',sans-serif;font-size:.8rem;font-weight:500;cursor:pointer;transition:background .2s;-webkit-tap-highlight-color:transparent}
+.run-btn:hover{background:var(--ink-s)}
+.run-btn:disabled{opacity:.45;cursor:default}
+.run-btn svg{width:13px;height:13px}
+
+.d-loading{display:none;align-items:center;gap:.75rem;padding:.75rem 1rem;background:var(--surf2);border:1px solid var(--bdr);border-radius:10px;margin:.9rem 0}
+.d-loading.show{display:flex}
+.d-spinner{width:18px;height:18px;border:2px solid var(--cl-l);border-top-color:var(--cl-d);border-radius:50%;animation:spin .7s linear infinite;flex-shrink:0}
+.d-steps{display:flex;flex-direction:column;gap:.2rem}
+.d-step{font-size:.72rem;color:var(--bdr-s);transition:color .25s}
+.d-step.active{color:var(--cl-d);font-weight:500}
+.d-step.done{color:var(--grn)}
+
+.a-card{background:var(--cl);border:1px solid var(--bdr);border-radius:12px;overflow:hidden;animation:fadeUp .3s ease both}
+.a-header{padding:1rem 1.4rem;border-bottom:1px solid var(--bdr);display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.a-icon{width:28px;height:28px;background:var(--surf2);border-radius:7px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.a-title{font-family:'Cormorant Garamond',serif;font-size:1.05rem;font-weight:500;color:var(--ink)}
+.exec-t{font-size:.7rem;color:var(--ink-m);font-weight:300;margin-left:auto}
+.a-body{padding:1.25rem 1.4rem;font-size:.855rem;font-weight:300;line-height:1.85;color:var(--ink-s)}
+.a-body strong{font-weight:500;color:var(--ink)}
+.cite{font-size:.72rem;font-weight:400;color:var(--cl-d);background:var(--cl-l);padding:1px 5px;border-radius:3px;margin:0 1px}
+
+.tab-bar{display:flex;border-bottom:1px solid var(--bdr);padding:0 1.4rem;overflow-x:auto;-webkit-overflow-scrolling:touch}
+.tab-bar::-webkit-scrollbar{height:0}
+.tab{padding:.55rem .8rem;font-size:.72rem;font-weight:400;color:var(--ink-m);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;white-space:nowrap;transition:all .15s;-webkit-tap-highlight-color:transparent}
+.tab.active{color:var(--ink);border-bottom-color:var(--cl-d);font-weight:500}
+.tab-panel{display:none}
+.tab-panel.active{display:block}
+
+.src-wrap{padding:.9rem 1.4rem}
+.src-label{font-size:.62rem;text-transform:uppercase;letter-spacing:.1em;color:var(--ink-m);font-weight:500;margin-bottom:.6rem}
+.src-chips{display:flex;flex-wrap:wrap;gap:.35rem;margin-bottom:1rem}
+.src-chip{font-size:.7rem;color:var(--cl-d);background:var(--cl-l);border:1px solid var(--bdr-s);padding:2px 7px;border-radius:4px;font-weight:400}
+.sim-row{display:flex;align-items:center;gap:8px;margin-bottom:.4rem;font-size:.7rem}
+.sim-name{width:175px;color:var(--ink-m);font-weight:300;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex-shrink:0}
+.sim-track{flex:1;height:4px;background:var(--cl-l);border-radius:2px;overflow:hidden}
+.sim-fill{height:100%;border-radius:2px;background:var(--cl-d);animation:barIn .5s ease both}
+.sim-val{width:28px;text-align:right;color:var(--ink-m);font-weight:500}
+
+.conflict-banner{margin:.9rem 1.4rem;background:var(--red-bg);border:1px solid var(--red-bdr);border-radius:9px;padding:.9rem 1rem}
+.cb-hdr{display:flex;align-items:center;gap:6px;color:var(--red);font-size:.78rem;font-weight:500;margin-bottom:.65rem}
+.cb-hdr svg{width:13px;height:13px;flex-shrink:0}
+.c-item{padding:.5rem 0;border-top:1px solid rgba(180,50,50,.1)}
+.c-item:first-child{padding-top:0;border-top:none}
+.c-badges{display:flex;align-items:center;gap:.35rem;margin-bottom:.25rem;flex-wrap:wrap}
+.c-sev{font-size:.6rem;font-weight:600;padding:2px 6px;border-radius:3px;letter-spacing:.06em}
+.sev-high{background:rgba(180,50,50,.15);color:var(--red)}
+.sev-med{background:rgba(150,100,20,.13);color:var(--amb)}
+.c-type{font-size:.64rem;font-weight:500;color:var(--ink-m);text-transform:uppercase;letter-spacing:.06em}
+.c-desc{font-size:.76rem;color:var(--ink-m);font-weight:300;line-height:1.5}
+
+.ok-banner{margin:.9rem 1.4rem;background:var(--grn-bg);border:1px solid rgba(40,100,60,.18);border-radius:9px;padding:.8rem 1rem;display:flex;align-items:center;gap:.5rem;font-size:.78rem;color:var(--grn)}
+.ok-banner svg{width:13px;height:13px;flex-shrink:0}
+
+.verif-row{padding:.8rem 1.4rem;border-top:1px solid var(--bdr);display:flex;align-items:flex-start;gap:.5rem;flex-wrap:wrap}
+.verif-label{font-size:.73rem;color:var(--ink-m);font-weight:300;padding-top:2px}
+.h-badge{font-size:.6rem;font-weight:600;padding:2px 8px;border-radius:20px;text-transform:uppercase;letter-spacing:.06em;flex-shrink:0}
+.h-ver{background:var(--grn-bg);color:var(--grn)}
+.h-flg{background:var(--red-bg);color:var(--red)}
+.verif-detail{font-size:.73rem;color:var(--ink-m);font-weight:300;line-height:1.5}
+
+.claims-wrap{padding:.9rem 1.4rem}
+.claim-row{padding:.55rem 0;border-bottom:1px solid var(--bdr);font-size:.76rem}
+.claim-row:last-child{border-bottom:none}
+.claim-text{color:var(--ink-s);font-weight:300;line-height:1.5;margin-bottom:.3rem}
+.claim-meta{display:flex;gap:.35rem;flex-wrap:wrap;align-items:center}
+.cm{font-size:.65rem;padding:2px 6px;border-radius:3px;font-weight:500}
+.cm-ent{background:var(--grn-bg);color:var(--grn)}
+.cm-con{background:var(--red-bg);color:var(--red)}
+.cm-neu{background:var(--amb-bg);color:var(--amb)}
+.cm-src{background:var(--cl-l);color:var(--cl-d)}
+
+.timing-wrap{padding:.9rem 1.4rem}
+.t-row{display:flex;align-items:center;gap:8px;margin-bottom:.45rem;font-size:.76rem}
+.t-label{width:155px;color:var(--ink-m);font-weight:300;flex-shrink:0}
+.t-track{flex:1;height:5px;background:var(--cl-l);border-radius:2px;overflow:hidden}
+.t-bar{height:100%;border-radius:2px;background:var(--cl-d);animation:barIn .5s ease both}
+.t-val{width:55px;text-align:right;color:var(--ink);font-weight:500}
+
+/* MOBILE */
+@media(max-width:960px){:root{--sw:200px}.qa-layout{grid-template-columns:1fr}.stats-grid{grid-template-columns:repeat(2,1fr)}.vector-grid{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:768px){
+  :root{--sw:min(82vw,300px)}
+  .app-layout{grid-template-columns:1fr}
+  .mobile-topbar{display:flex}
+  .sidebar{position:fixed;top:0;left:0;height:100vh;width:var(--sw);transform:translateX(-100%);z-index:70}
+  body.nav-open .sidebar{transform:none}
+  body.nav-open .nav-overlay{opacity:1;visibility:visible}
+  .nav-collapse-btn,.nav-fab{display:none!important}
+  .main-content{margin-top:56px}
+  .page-header{padding:1.5rem 1.25rem 1rem;flex-wrap:wrap;gap:.75rem}
+  .page-title{font-size:1.5rem}
+  .page-body{padding:1.25rem 1.25rem 6rem}
+  .stats-grid{grid-template-columns:repeat(2,1fr)}
+  .vector-grid{grid-template-columns:1fr}
+  .qa-layout{grid-template-columns:1fr}
+  .form-split{grid-template-columns:1fr}
+  .btn-ask{width:100%}
+  .qa-footer{flex-direction:column;align-items:stretch}
+  .data-table{min-width:0}
+  .data-table thead{display:none}
+  .data-table,.data-table tbody,.data-table tr,.data-table td{display:block;width:100%}
+  .data-table tr{border:1px solid var(--bdr);border-radius:10px;margin-bottom:.75rem;padding:.35rem .9rem;background:var(--cl)}
+  .data-table td{display:flex;justify-content:space-between;align-items:center;gap:1rem;padding:.45rem 0;border:none;text-align:right}
+  .data-table td::before{content:attr(data-label);font-weight:500;color:var(--ink-m);text-align:left;flex-shrink:0}
+  .data-table td:last-child{justify-content:flex-end}
+  .sim-name{width:120px}
+  .t-label{width:120px}
+}
+@media(max-width:480px){.stats-grid{grid-template-columns:1fr}.auth-form-container{max-width:100%}.page-title{font-size:1.3rem}}
+@media(max-width:820px){.auth-layout{grid-template-columns:1fr}.auth-panel-left{display:none!important}.auth-panel-right{min-height:100vh;padding:2rem 1.25rem}.auth-form-title{font-size:1.75rem}}
+
+/* PREVIEW SWITCH */
+#preview-switch{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);display:flex;gap:4px;background:var(--ink);padding:6px;border-radius:12px;z-index:9999;box-shadow:0 8px 30px rgba(0,0,0,.25);max-width:calc(100vw - 2rem);overflow-x:auto;-webkit-overflow-scrolling:touch}
+#preview-switch::-webkit-scrollbar{height:0}
+#preview-switch button{border:none;background:transparent;color:rgba(235,229,194,.6);font:500 .75rem 'DM Sans',sans-serif;padding:7px 12px;border-radius:8px;cursor:pointer;white-space:nowrap;-webkit-tap-highlight-color:transparent}
+#preview-switch button.active{background:var(--cl);color:var(--ink)}
 </style>
 </head>
 <body>
-<div id="toast"></div>
+<div id="toast" style="position:fixed;bottom:2rem;left:50%;transform:translateX(-50%);background:var(--ink);color:var(--cl);padding:.75rem 1.5rem;border-radius:8px;font-size:.825rem;opacity:0;pointer-events:none;transition:opacity .2s;z-index:9999;white-space:nowrap;max-width:90vw;text-align:center;"></div>
+
 <svg style="display:none">
-  <symbol id="ico-logo" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-    <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
-  </symbol>
-  <!-- nade AI brand: compact square mark ("n" + gold dot) -->
-  <symbol id="nade-mark" viewBox="0 0 32 32">
-    <text x="16" y="25" text-anchor="middle" font-family="Poppins, sans-serif"
-          font-weight="600" font-size="27" fill="currentColor">n</text>
-    <circle cx="21.5" cy="17.5" r="3.3" fill="#C8A062"/>
-  </symbol>
-  <!-- nade AI brand: full wordmark -->
-  <symbol id="nade-wordmark" viewBox="0 0 182 64">
-    <text x="0" y="50" font-family="Poppins, sans-serif" font-weight="600"
-          font-size="54" letter-spacing="-2" fill="currentColor">nade</text>
-    <circle cx="50" cy="38.5" r="6" fill="#C8A062"/>
-    <text x="138" y="24" font-family="Poppins, sans-serif" font-weight="500"
-          font-size="21" letter-spacing="1" fill="#C8A062">AI</text>
-  </symbol>
-  <symbol id="ico-home" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-    <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/>
-    <polyline points="9 22 9 12 15 12 15 22"/>
-  </symbol>
-  <symbol id="ico-grid" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-    <rect x="3" y="3" width="7" height="7"/>
-    <rect x="14" y="3" width="7" height="7"/>
-    <rect x="14" y="14" width="7" height="7"/>
-    <rect x="3" y="14" width="7" height="7"/>
-  </symbol>
-  <symbol id="ico-users" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-    <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/>
-    <circle cx="9" cy="7" r="4"/>
-    <path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/>
-  </symbol>
-  <symbol id="ico-docs" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-    <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/>
-    <polyline points="14 2 14 8 20 8"/>
-    <line x1="16" y1="13" x2="8" y2="13"/>
-    <line x1="16" y1="17" x2="8" y2="17"/>
-    <line x1="10" y1="9" x2="8" y2="9"/>
-  </symbol>
-  <symbol id="ico-logout" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-    <path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/>
-    <polyline points="16 17 21 12 16 7"/>
-    <line x1="21" y1="12" x2="9" y2="12"/>
-  </symbol>
-  <symbol id="ico-upload" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-    <polyline points="16 16 12 12 8 16"/>
-    <line x1="12" y1="12" x2="12" y2="21"/>
-    <path d="M20.39 18.39A5 5 0 0018 9h-1.26A8 8 0 103 16.3"/>
-  </symbol>
-  <symbol id="ico-send" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-    <line x1="22" y1="2" x2="11" y2="13"/>
-    <polygon points="22 2 15 22 11 13 2 9 22 2"/>
-  </symbol>
-  <symbol id="ico-refresh" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-    <polyline points="23 4 23 10 17 10"/>
-    <polyline points="1 20 1 14 7 14"/>
-    <path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/>
-  </symbol>
-  <symbol id="ico-file" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-    <path d="M13 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V9z"/>
-    <polyline points="13 2 13 9 20 9"/>
-  </symbol>
-  <symbol id="ico-trash" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-    <polyline points="3 6 5 6 21 6"/>
-    <path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/>
-    <path d="M10 11v6M14 11v6M9 6V4h6v2"/>
-  </symbol>
-  <symbol id="ico-plus" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-    <line x1="12" y1="5" x2="12" y2="19"/>
-    <line x1="5" y1="12" x2="19" y2="12"/>
-  </symbol>
-  <symbol id="ico-search" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-    <circle cx="11" cy="11" r="8"/>
-    <line x1="21" y1="21" x2="16.65" y2="16.65"/>
-  </symbol>
-  <symbol id="ico-warning" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-    <path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/>
-    <line x1="12" y1="9" x2="12" y2="13"/>
-    <line x1="12" y1="17" x2="12.01" y2="17"/>
-  </symbol>
+  <symbol id="nade-mark" viewBox="0 0 32 32"><text x="16" y="25" text-anchor="middle" font-family="Poppins,sans-serif" font-weight="600" font-size="27" fill="currentColor">n</text><circle cx="21.5" cy="17.5" r="3.3" fill="#C8A062"/></symbol>
+  <symbol id="nade-wm" viewBox="0 0 182 64"><text x="0" y="50" font-family="Poppins,sans-serif" font-weight="600" font-size="54" letter-spacing="-2" fill="currentColor">nade</text><circle cx="50" cy="38.5" r="6" fill="#C8A062"/><text x="138" y="24" font-family="Poppins,sans-serif" font-weight="500" font-size="21" letter-spacing="1" fill="#C8A062">AI</text></symbol>
+  <symbol id="i-home" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></symbol>
+  <symbol id="i-grid" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></symbol>
+  <symbol id="i-users" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></symbol>
+  <symbol id="i-docs" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></symbol>
+  <symbol id="i-logout" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></symbol>
+  <symbol id="i-upload" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polyline points="16 16 12 12 8 16"/><line x1="12" y1="12" x2="12" y2="21"/><path d="M20.39 18.39A5 5 0 0018 9h-1.26A8 8 0 103 16.3"/></symbol>
+  <symbol id="i-send" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></symbol>
+  <symbol id="i-refresh" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/></symbol>
+  <symbol id="i-file" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M13 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V9z"/><polyline points="13 2 13 9 20 9"/></symbol>
+  <symbol id="i-trash" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6M14 11v6M9 6V4h6v2"/></symbol>
+  <symbol id="i-plus" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></symbol>
+  <symbol id="i-search" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></symbol>
+  <symbol id="i-warn" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></symbol>
+  <symbol id="i-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></symbol>
+  <symbol id="i-play" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polygon points="5 3 19 12 5 21 5 3"/></symbol>
 </svg>
+
+<!-- ── PAGE: LOGIN ── -->
 <div class="preview-page" data-page="login" hidden>
-
-
 <div class="auth-layout">
-
-  <!-- LEFT PANEL -->
   <div class="auth-panel-left">
-    <div class="auth-brand">
-      <svg class="auth-wordmark" width="150" height="53" viewBox="0 0 182 64" aria-label="nade AI"><use href="#nade-wordmark"/></svg>
-    </div>
-
+    <div><svg class="auth-wordmark" width="150" height="53" viewBox="0 0 182 64"><use href="#nade-wm"/></svg></div>
     <div class="auth-tagline">
       <h1>Tanya dokumenmu,<br>dapatkan <em>jawaban</em><br>yang tepat.</h1>
       <p>Sistem tanya-jawab berbasis dokumen lokal bertenaga AI — privat, cepat, dan aman.</p>
     </div>
-
-    <div class="auth-ornament">
-      <svg viewBox="0 0 200 200" fill="none" stroke="white" stroke-width="0.5">
-        <circle cx="100" cy="100" r="90"/>
-        <circle cx="100" cy="100" r="70"/>
-        <circle cx="100" cy="100" r="50"/>
-        <circle cx="100" cy="100" r="30"/>
-        <line x1="10" y1="100" x2="190" y2="100"/>
-        <line x1="100" y1="10" x2="100" y2="190"/>
-        <line x1="29" y1="29" x2="171" y2="171"/>
-        <line x1="171" y1="29" x2="29" y2="171"/>
-      </svg>
-    </div>
+    <div class="auth-ornament"><svg viewBox="0 0 200 200" fill="none" stroke="white" stroke-width="0.5"><circle cx="100" cy="100" r="90"/><circle cx="100" cy="100" r="70"/><circle cx="100" cy="100" r="50"/><circle cx="100" cy="100" r="30"/><line x1="10" y1="100" x2="190" y2="100"/><line x1="100" y1="10" x2="100" y2="190"/></svg></div>
   </div>
-
-  <!-- RIGHT PANEL -->
   <div class="auth-panel-right">
     <div class="auth-form-container">
       <div class="auth-form-title">Selamat datang</div>
       <div class="auth-form-subtitle">Masuk untuk menggunakan Nade AI</div>
-
-      
-        
-      
-
-      <form method="POST" action="#">
-        <input type="hidden" name="csrf_token" value="preview">
-
-        <div class="form-group">
-          <label class="form-label">Username</label>
-          <input class="form-input" type="text" name="username" placeholder="masukkan username" required autocomplete="username">
-        </div>
-
-        <div class="form-group">
-          <label class="form-label">Password</label>
-          <input class="form-input" type="password" name="password" placeholder="masukkan password" required autocomplete="current-password">
-        </div>
-
-        <button class="btn-primary" type="submit">Masuk</button>
-      </form>
-
-      <div class="auth-footer">
-        Belum punya akun? <a href="#">Buat akun gratis</a>
-      </div>
+      <div class="form-group"><label class="form-label">Username</label><input class="form-input" type="text" placeholder="masukkan username"></div>
+      <div class="form-group"><label class="form-label">Password</label><input class="form-input" type="password" placeholder="masukkan password"></div>
+      <button class="btn-primary" type="button" onclick="showPage('qa')">Masuk</button>
+      <div class="auth-footer">Belum punya akun? <a href="#" onclick="showPage('register');return false">Buat akun gratis</a></div>
     </div>
   </div>
-
+</div>
 </div>
 
-
-</div><div class="preview-page" data-page="register" hidden>
-
-
+<!-- ── PAGE: REGISTER ── -->
+<div class="preview-page" data-page="register" hidden>
 <div class="auth-layout">
-
   <div class="auth-panel-left">
-    <div class="auth-brand">
-      <svg class="auth-wordmark" width="150" height="53" viewBox="0 0 182 64" aria-label="nade AI"><use href="#nade-wordmark"/></svg>
-    </div>
-
-    <div class="auth-tagline">
-      <h1>Bergabunglah,<br>mulai <em>eksplorasi</em><br>dokumenmu.</h1>
-      <p>Daftarkan akun dan mulai mengindex dokumen. Gratis, lokal, dan sepenuhnya milikmu.</p>
-    </div>
+    <div><svg class="auth-wordmark" width="150" height="53" viewBox="0 0 182 64"><use href="#nade-wm"/></svg></div>
+    <div class="auth-tagline"><h1>Bergabunglah,<br>mulai <em>eksplorasi</em><br>dokumenmu.</h1><p>Daftarkan akun dan mulai mengindex dokumen.</p></div>
   </div>
-
   <div class="auth-panel-right">
     <div class="auth-form-container">
       <div class="auth-form-title">Buat Akun Baru</div>
       <div class="auth-form-subtitle">Daftarkan akun untuk mulai menggunakan Nade AI</div>
-
-      
-        
-      
-
-      <form method="POST" action="#">
-        <input type="hidden" name="csrf_token" value="preview">
-
-        <div class="form-group">
-          <label class="form-label">Username</label>
-          <input class="form-input" type="text" name="username" placeholder="minimum 3 karakter" required minlength="3">
-        </div>
-
-        <div class="form-group">
-          <label class="form-label">Email <span>— opsional</span></label>
-          <input class="form-input" type="email" name="email" placeholder="email@example.com">
-        </div>
-
-        <div class="form-group">
-          <label class="form-label">Password</label>
-          <input class="form-input" type="password" name="password" placeholder="minimum 6 karakter" required minlength="6">
-        </div>
-
-        <button class="btn-primary" type="submit">Buat Akun</button>
-      </form>
-
-      <div class="auth-footer">
-        Sudah punya akun? <a href="#">Login sekarang</a>
-      </div>
+      <div class="form-group"><label class="form-label">Username</label><input class="form-input" type="text" placeholder="minimum 3 karakter"></div>
+      <div class="form-group"><label class="form-label">Email <span>— opsional</span></label><input class="form-input" type="email" placeholder="email@example.com"></div>
+      <div class="form-group"><label class="form-label">Password</label><input class="form-input" type="password" placeholder="minimum 6 karakter"></div>
+      <button class="btn-primary" type="button">Buat Akun</button>
+      <div class="auth-footer">Sudah punya akun? <a href="#" onclick="showPage('login');return false">Login sekarang</a></div>
     </div>
   </div>
-
+</div>
 </div>
 
+<!-- ── PAGE: QA (utama, dengan demo di bawah) ── -->
+<div class="preview-page" data-page="qa">
+<div class="app-layout" id="qa-root"></div>
+</div>
 
-</div><div class="preview-page" data-page="qa">
+<!-- ── PAGE: DASHBOARD ── -->
+<div class="preview-page" data-page="dashboard" hidden>
+<div class="app-layout" id="dash-root"></div>
+</div>
 
+<!-- ── PAGE: USERS ── -->
+<div class="preview-page" data-page="users" hidden>
+<div class="app-layout" id="users-root"></div>
+</div>
 
-<div class="app-layout">
-  
-  <!-- Mobile top app bar (phones only) -->
-<header class="mobile-topbar">
-  <button class="nav-toggle" type="button" data-nav="open" aria-label="Buka menu">
-    <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
-  </button>
-  <svg class="topbar-wordmark" width="86" height="30" viewBox="0 0 182 64" aria-label="nade AI"><use href="#nade-wordmark"/></svg>
-</header>
+<!-- ── PAGE: DOCUMENTS ── -->
+<div class="preview-page" data-page="documents" hidden>
+<div class="app-layout" id="docs-root"></div>
+</div>
 
-<!-- Backdrop when drawer open -->
-<div class="nav-overlay" data-nav="close"></div>
+<nav id="preview-switch">
+  <button data-pg="login">Login</button>
+  <button data-pg="register">Register</button>
+  <button data-pg="qa">Tanya Dokumen</button>
+  <button data-pg="dashboard">Dashboard</button>
+  <button data-pg="users">Users</button>
+  <button data-pg="documents">Documents</button>
+</nav>
 
-<!-- Floating button to reopen sidebar when collapsed (desktop) -->
-<button class="nav-fab" type="button" data-nav="show" aria-label="Tampilkan menu">
-  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
-</button>
+<script>
+/* ── DEMO DATA ── */
+const SC = [
+  {
+    label:"Konflik Berat — Laba Bersih",dot:"dot-r",
+    query:"Berapa laba bersih PT Teknologi Maju Indonesia tahun 2024?",
+    conf:"0%",confClass:"conf-lo",execMs:127920,
+    answer:`Laba bersih PT Teknologi Maju Indonesia tahun 2024 dapat dilihat dari beberapa sumber yang berbeda.<br><br>Menurut <span class="cite">[notulen_rapat_direksi_jan2025.docx]</span>, laba bersih tahun 2024 adalah <strong>Rp 10,5 miliar</strong>, setelah koreksi pajak Rp 1,5 miliar. Namun, <span class="cite">[laporan_keuangan_2024.docx]</span> menyebutkan laba bersih sebesar <strong>Rp 12 miliar</strong>. Sementara itu, <span class="cite">[audit_eksternal_2024.docx]</span> menyebutkan <strong>Rp 9,8 miliar</strong>, berdasarkan opini audit independen oleh KAP Santoso & Rekan.<br><br>Sumber paling autoritatif adalah <span class="cite">[audit_eksternal_2024.docx]</span> karena merupakan laporan audit eksternal yang independen. Nilai laba bersih yang paling dapat dipercaya adalah <strong>Rp 9,8 miliar</strong>.`,
+    sources:["notulen_rapat_direksi_jan2025.docx","laporan_keuangan_2024.docx","laporan_sales_q4_2024.docx","laporan_produk_datasync.docx","audit_eksternal_2024.docx"],
+    sims:[{n:"notulen_rapat_direksi_jan2025.docx",v:.71},{n:"laporan_keuangan_2024.docx",v:.68},{n:"audit_eksternal_2024.docx",v:.64},{n:"laporan_sales_q4_2024.docx",v:.22},{n:"laporan_produk_datasync.docx",v:.19}],
+    conflicts:[
+      {sev:"HIGH",type:"TEMPORAL_CONFLICT",desc:"7 tanggal berbeda ditemukan di seluruh dokumen: Jan 2023, Agu 2024, Nov 2024, Des 2024, Jan 2025 (×3). Verifikasi tanggal mana yang relevan."},
+      {sev:"HIGH",type:"VALUE_CONFLICT",desc:"Laba bersih tidak konsisten: Rp 12 miliar (Laporan Keuangan) vs Rp 10,5 miliar (Notulen Direksi) vs Rp 9,8 miliar (Audit Eksternal)."},
+      {sev:"HIGH",type:"VALUE_CONFLICT",desc:"Total aset tidak konsisten: Rp 95 miliar (Laporan Keuangan) vs Rp 90 miliar (Audit, setelah revaluasi gedung Jakarta Rp 40M → Rp 35M)."},
+      {sev:"MEDIUM",type:"MULTI_SOURCE",desc:"Topik muncul di 5 dokumen dengan relevansi tinggi. Cross-check jawaban terhadap beberapa sumber."},
+    ],
+    hallStatus:"FLAGGED",hallClass:"h-flg",
+    hallDetail:"10/12 klaim flagged via NLI (hallucination_score=0.852). Nilai berbeda di tiap sumber menyebabkan NLI mendeteksi kontradiksi.",
+    timing:[{l:"Embed query",v:5},{l:"Similarity search",v:312},{l:"Conflict detection",v:1},{l:"LLM (Groq API)",v:712},{l:"NLI check (CPU)",v:126890}],
+    claims:[
+      {t:"Laba bersih 2024 adalah Rp 10,5 miliar (notulen direksi).",ent:"0.78",con:"0.11",vd:"entailment",src:"notulen_rapat_direksi_jan2025.docx"},
+      {t:"Laporan keuangan menyebut Rp 12 miliar.",ent:"0.81",con:"0.09",vd:"entailment",src:"laporan_keuangan_2024.docx"},
+      {t:"Audit eksternal menyebut Rp 9,8 miliar.",ent:"0.83",con:"0.07",vd:"entailment",src:"audit_eksternal_2024.docx"},
+      {t:"Sumber paling autoritatif adalah audit eksternal karena independen.",ent:"0.29",con:"0.41",vd:"neutral",src:"audit_eksternal_2024.docx"},
+      {t:"Nilai paling dapat dipercaya adalah Rp 9,8 miliar.",ent:"0.22",con:"0.58",vd:"contradiction",src:"notulen_rapat_direksi_jan2025.docx"},
+    ],
+    noConflict:false,totalDelay:5200,
+  },
+  {
+    label:"Konflik Ringan — Versi Produk",dot:"dot-a",
+    query:"Versi berapa DataSync Pro yang terkini dan kapan dirilis?",
+    conf:"17%",confClass:"conf-mid",execMs:14320,
+    answer:`Berdasarkan <span class="cite">[laporan_produk_datasync.docx]</span>, versi terkini DataSync Pro adalah <strong>versi 4.3</strong>, yang dirilis pada <strong>10 November 2024</strong>.<br><br>Perlu dicatat, <span class="cite">[laporan_keuangan_2024.docx]</span> masih menyebut versi 4.2 (rilis Agustus 2024) karena laporan tersebut dibuat sebelum versi 4.3 terdokumentasi di semua divisi. Hal ini dikonfirmasi dalam <span class="cite">[notulen_rapat_direksi_jan2025.docx]</span> yang menetapkan DataSync Pro 4.3 sebagai versi resmi per 10 Januari 2025.<br><br>Dengan demikian, <strong>versi 4.3 (November 2024)</strong> adalah yang paling terkini berdasarkan sumber terbaru dan keputusan resmi direksi.`,
+    sources:["laporan_produk_datasync.docx","notulen_rapat_direksi_jan2025.docx","laporan_keuangan_2024.docx"],
+    sims:[{n:"laporan_produk_datasync.docx",v:.74},{n:"notulen_rapat_direksi_jan2025.docx",v:.61},{n:"laporan_keuangan_2024.docx",v:.53}],
+    conflicts:[
+      {sev:"HIGH",type:"TEMPORAL_CONFLICT",desc:"Dua tanggal rilis berbeda: Agustus 2024 (v4.2, dari laporan keuangan) vs November 2024 (v4.3, dari laporan produk & notulen direksi)."},
+      {sev:"HIGH",type:"VALUE_CONFLICT",desc:"Laporan keuangan menyebut v4.2, sementara laporan produk dan notulen direksi mengkonfirmasi v4.3 sebagai versi aktif."},
+    ],
+    hallStatus:"VERIFIED",hallClass:"h-ver",
+    hallDetail:"3/3 klaim terverifikasi via NLI (hallucination_score=0.18). Meski ada konflik antar dokumen, klaim v4.3 didukung kuat oleh sumber terbaru.",
+    timing:[{l:"Embed query",v:5},{l:"Similarity search",v:187},{l:"Conflict detection",v:1},{l:"LLM (Groq API)",v:621},{l:"NLI check (CPU)",v:13506}],
+    claims:[
+      {t:"Versi terkini DataSync Pro adalah versi 4.3.",ent:"0.89",con:"0.04",vd:"entailment",src:"laporan_produk_datasync.docx"},
+      {t:"Dirilis pada 10 November 2024.",ent:"0.91",con:"0.03",vd:"entailment",src:"laporan_produk_datasync.docx"},
+      {t:"Dikonfirmasi dalam notulen rapat direksi 10 Januari 2025.",ent:"0.85",con:"0.05",vd:"entailment",src:"notulen_rapat_direksi_jan2025.docx"},
+    ],
+    noConflict:false,totalDelay:3800,
+  },
+  {
+    label:"Tidak Ada Konflik — Harga Produk",dot:"dot-g",
+    query:"Berapa harga langganan DataSync Pro paket Enterprise per bulan?",
+    conf:"91%",confClass:"conf-hi",execMs:9840,
+    answer:`Harga langganan DataSync Pro paket <strong>Enterprise</strong> adalah <strong>Rp 5 juta per bulan</strong> <span class="cite">[laporan_produk_datasync.docx]</span>.<br><br>Informasi ini juga konsisten dengan yang disebutkan dalam <span class="cite">[laporan_keuangan_2024.docx]</span>, yang menggunakan angka Rp 5 juta per bulan sebagai acuan proyeksi pendapatan. Selain Enterprise, tersedia paket Starter (Rp 1,5 juta/bulan) dan Professional (Rp 3 juta/bulan) <span class="cite">[laporan_produk_datasync.docx]</span>.`,
+    sources:["laporan_produk_datasync.docx","laporan_keuangan_2024.docx"],
+    sims:[{n:"laporan_produk_datasync.docx",v:.83},{n:"laporan_keuangan_2024.docx",v:.72}],
+    conflicts:[],
+    hallStatus:"VERIFIED",hallClass:"h-ver",
+    hallDetail:"4/4 klaim terverifikasi via NLI (hallucination_score=0.09). Data konsisten di semua sumber.",
+    timing:[{l:"Embed query",v:5},{l:"Similarity search",v:143},{l:"Conflict detection",v:0},{l:"LLM (Groq API)",v:589},{l:"NLI check (CPU)",v:9103}],
+    claims:[
+      {t:"Harga paket Enterprise adalah Rp 5 juta per bulan.",ent:"0.95",con:"0.02",vd:"entailment",src:"laporan_produk_datasync.docx"},
+      {t:"Konsisten dengan laporan keuangan.",ent:"0.88",con:"0.04",vd:"entailment",src:"laporan_keuangan_2024.docx"},
+      {t:"Paket Starter tersedia di Rp 1,5 juta per bulan.",ent:"0.93",con:"0.03",vd:"entailment",src:"laporan_produk_datasync.docx"},
+      {t:"Paket Professional tersedia di Rp 3 juta per bulan.",ent:"0.92",con:"0.02",vd:"entailment",src:"laporan_produk_datasync.docx"},
+    ],
+    noConflict:true,totalDelay:3200,
+  },
+];
 
-<!-- Sidebar -->
-<aside class="sidebar">
-  <div class="sidebar-header">
-    <div class="sidebar-brand-block">
-      <svg class="sidebar-wordmark" width="116" height="41" viewBox="0 0 182 64" aria-label="nade AI"><use href="#nade-wordmark"/></svg>
-      <small class="sidebar-brand-sub">Document Q&amp;A</small>
+let curSC = 0;
+let running = false;
+
+function fmtMs(ms){return ms>=1000?(ms/1000).toFixed(1)+'s':ms+'ms';}
+
+/* ── SIDEBAR INJECTOR ── */
+function mkSidebar(activePg){
+  return `
+  <header class="mobile-topbar">
+    <button class="nav-toggle" type="button" data-nav="open"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
+    <svg class="topbar-wordmark" width="86" height="30" viewBox="0 0 182 64"><use href="#nade-wm"/></svg>
+  </header>
+  <div class="nav-overlay" data-nav="close"></div>
+  <button class="nav-fab" type="button" data-nav="show"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <div class="sidebar-brand-block">
+        <svg class="sidebar-wordmark" width="116" height="41" viewBox="0 0 182 64"><use href="#nade-wm"/></svg>
+        <small class="sidebar-brand-sub">Document Q&amp;A</small>
+      </div>
+      <button class="nav-collapse-btn" type="button" data-nav="collapse"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg></button>
     </div>
-    <button class="nav-collapse-btn" type="button" data-nav="collapse" aria-label="Sembunyikan menu" title="Sembunyikan menu">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
-    </button>
-  </div>
-
-  <nav class="sidebar-nav">
-    <div class="sidebar-section-label">Menu Utama</div>
-    <a href="#" class="sidebar-item active">
-      <svg><use href="#ico-home"/></svg> Tanya Dokumen
-    </a>
-
-    
-    <div class="sidebar-section-label">Admin</div>
-    <a href="#" class="sidebar-item ">
-      <svg><use href="#ico-grid"/></svg> Dashboard
-    </a>
-    <a href="#" class="sidebar-item ">
-      <svg><use href="#ico-users"/></svg> Users
-    </a>
-    <a href="#" class="sidebar-item ">
-      <svg><use href="#ico-docs"/></svg> Semua Dokumen
-    </a>
-    
-  </nav>
-
-  <div class="sidebar-user">
-    <div class="sidebar-avatar">D</div>
-    <div class="sidebar-user-info">
-      <div class="sidebar-user-name">Dhea</div>
-      <div class="sidebar-user-role">admin</div>
+    <nav class="sidebar-nav">
+      <div class="sidebar-section-label">Menu Utama</div>
+      <a href="#" class="sidebar-item${activePg==='qa'?' active':''}" data-pg="qa"><svg><use href="#i-home"/></svg> Tanya Dokumen</a>
+      <div class="sidebar-section-label">Admin</div>
+      <a href="#" class="sidebar-item${activePg==='dashboard'?' active':''}" data-pg="dashboard"><svg><use href="#i-grid"/></svg> Dashboard</a>
+      <a href="#" class="sidebar-item${activePg==='users'?' active':''}" data-pg="users"><svg><use href="#i-users"/></svg> Users</a>
+      <a href="#" class="sidebar-item${activePg==='documents'?' active':''}" data-pg="documents"><svg><use href="#i-docs"/></svg> Semua Dokumen</a>
+    </nav>
+    <div class="sidebar-user">
+      <div class="sidebar-avatar">D</div>
+      <div class="sidebar-user-info"><div class="sidebar-user-name">Dhea</div><div class="sidebar-user-role">admin</div></div>
+      <a href="#" class="sidebar-logout"><svg><use href="#i-logout"/></svg></a>
     </div>
-    <a href="#" class="sidebar-logout" title="Logout">
-      <svg><use href="#ico-logout"/></svg>
-    </a>
-  </div>
-</aside>
+  </aside>`;
+}
 
+/* ── QA PAGE ── */
+function buildQA(){
+  const root = document.getElementById('qa-root');
+  root.innerHTML = mkSidebar('qa') + `
   <div class="main-content">
     <div class="page-header">
-      <div>
-        <div class="page-title">Tanya Dokumen</div>
-        <div class="page-subtitle">Ajukan pertanyaan berbasis dokumen yang sudah di-index sistem AI.</div>
-      </div>
+      <div><div class="page-title">Tanya Dokumen</div><div class="page-subtitle">Ajukan pertanyaan berbasis dokumen yang sudah di-index sistem AI.</div></div>
     </div>
-
     <div class="page-body">
-
-      
-      
-        
-      
-
       <div class="qa-layout">
-
-        <!-- QUESTION + ANSWER COLUMN -->
         <div class="qa-main">
           <div class="qa-panel">
             <div class="qa-panel-header">
-              <div class="qa-panel-icon">
-                <svg><use href="#ico-search"/></svg>
-              </div>
+              <div class="qa-panel-icon"><svg><use href="#i-search"/></svg></div>
               <span class="qa-panel-title">Pertanyaan</span>
             </div>
-            <form method="POST" action="#" id="qa-form">
-              <input type="hidden" name="csrf_token" value="preview">
-              <textarea
-                class="qa-textarea"
-                name="question"
-                id="qa-input"
-                placeholder="Contoh: Berapa total anggaran proyek tahun ini? Atau: Apa kesimpulan dari laporan Q3?"
-              ></textarea>
-              <div class="qa-footer">
-                <div class="qa-hint">Tekan <kbd>Ctrl</kbd> + <kbd>Enter</kbd> untuk submit cepat</div>
-                <button class="btn-ask" type="submit">
-                  <svg><use href="#ico-send"/></svg> Tanya AI
-                </button>
-              </div>
-            </form>
+            <textarea class="qa-textarea" id="qa-inp" placeholder="Contoh: Berapa total anggaran proyek tahun ini?"></textarea>
+            <div class="qa-footer">
+              <div class="qa-hint">Tekan <kbd>Ctrl</kbd> + <kbd>Enter</kbd></div>
+              <button class="btn-ask" id="qa-btn" type="button"><svg><use href="#i-send"/></svg> Tanya AI</button>
+            </div>
           </div>
-
-          
+          <div class="d-loading" id="d-loader">
+            <div class="d-spinner"></div>
+            <div class="d-steps">
+              <div class="d-step" id="ds0">Mengembedding query</div>
+              <div class="d-step" id="ds1">Mencari dokumen relevan</div>
+              <div class="d-step" id="ds2">Mendeteksi konflik</div>
+              <div class="d-step" id="ds3">Menghasilkan jawaban (Groq API)</div>
+              <div class="d-step" id="ds4">Verifikasi hallucination (NLI)</div>
+            </div>
+          </div>
+          <div id="qa-ans"></div>
         </div>
-
-        <!-- UPLOAD + DOCUMENTS PANEL -->
         <div>
           <div class="qa-panel">
             <div class="qa-panel-header">
-              <div class="qa-panel-icon">
-                <svg><use href="#ico-file"/></svg>
-              </div>
+              <div class="qa-panel-icon"><svg><use href="#i-file"/></svg></div>
               <span class="qa-panel-title">Dokumen</span>
-              <div style="margin-left:auto">
-                <a href="#" style="color:var(--ink-muted);display:flex;align-items:center" title="Refresh">
-                  <svg width="14" height="14"><use href="#ico-refresh"/></svg>
-                </a>
-              </div>
             </div>
-
-            <form method="POST" action="#" enctype="multipart/form-data">
-              <input type="hidden" name="csrf_token" value="preview">
-              <label class="upload-zone" for="file-input">
-                <div class="upload-icon"><svg><use href="#ico-upload"/></svg></div>
-                <div class="upload-title" id="upload-title">Klik atau tarik file ke sini</div>
-                <div class="upload-subtitle">PDF, DOCX, TXT, JPG, PNG, BMP, TIFF — maks 100MB</div>
-              </label>
-              <input type="file" id="file-input" name="file" style="display:none"
-                     accept=".pdf,.docx,.txt,.jpg,.jpeg,.png,.bmp,.tiff">
-
-              
-              <div class="checkbox-row">
-                <input type="checkbox" id="shared-cb" name="shared" value="1">
-                <label for="shared-cb">Tandai sebagai shared (admin)</label>
-              </div>
-              
-
-              <button class="btn-upload" type="submit">
-                <svg><use href="#ico-upload"/></svg> Upload &amp; Index
-              </button>
-            </form>
-
-            <!-- ── Multi-page camera scan ── -->
+            <label class="upload-zone" for="fi">
+              <div class="upload-icon"><svg><use href="#i-upload"/></svg></div>
+              <div class="upload-title">Klik atau tarik file ke sini</div>
+              <div class="upload-subtitle">PDF, DOCX, TXT, JPG, PNG — maks 100MB</div>
+            </label>
+            <input type="file" id="fi" style="display:none">
+            <div class="checkbox-row"><input type="checkbox" id="sh-cb"><label for="sh-cb">Tandai sebagai shared (admin)</label></div>
+            <button class="btn-upload" type="button"><svg><use href="#i-upload"/></svg> Upload &amp; Index</button>
             <div class="scan-card">
-              <div class="scan-card-head">
-                <svg width="15" height="15"><use href="#ico-file"/></svg>
-                <span>Scan Kamera — gabung jadi 1 dokumen</span>
-              </div>
-              <div id="scan-thumbs" class="scan-thumbs"></div>
-              <input type="file" id="scan-input" accept="image/*" capture="environment" multiple style="display:none">
-              <button type="button" id="scan-add" class="btn-secondary scan-btn">
-                <svg><use href="#ico-plus"/></svg> Tambah Halaman
-              </button>
-              <input type="text" id="scan-name" class="form-input scan-name" placeholder="Nama dokumen (mis. Invoice Maret)">
-              
-              <div class="checkbox-row">
-                <input type="checkbox" id="scan-shared" value="1">
-                <label for="scan-shared">Tandai sebagai shared (admin)</label>
-              </div>
-              
-              <button type="button" id="scan-save" class="btn-upload" disabled>
-                <svg><use href="#ico-upload"/></svg> Simpan sebagai 1 Dokumen
-              </button>
+              <div class="scan-card-head"><svg width="15" height="15"><use href="#i-file"/></svg><span>Scan Kamera — gabung jadi 1 dokumen</span></div>
+              <div id="sc-thumbs" class="scan-thumbs"></div>
+              <input type="file" id="sc-inp" accept="image/*" capture="environment" multiple style="display:none">
+              <button type="button" id="sc-add" class="btn-secondary scan-btn"><svg><use href="#i-plus"/></svg> Tambah Halaman</button>
+              <input type="text" id="sc-name" class="form-input scan-name" placeholder="Nama dokumen">
+              <div class="checkbox-row"><input type="checkbox" id="sc-sh"><label for="sc-sh">Shared (admin)</label></div>
+              <button type="button" id="sc-save" class="btn-upload" disabled><svg><use href="#i-upload"/></svg> Simpan sebagai 1 Dokumen</button>
             </div>
-
             <div class="doc-list-label">Dokumen Saya</div>
-
-            
-              
-              <div style="display:flex;align-items:center;gap:10px;padding:0.75rem 1.5rem;border-top:1px solid var(--border);font-size:0.825rem">
-                <svg width="14" height="14" style="color:var(--cream-mid);flex-shrink:0"><use href="#ico-file"/></svg>
-                <span style="flex:1;font-weight:300;color:var(--ink-soft);overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="Laporan-Keuangan-Q3.pdf">Laporan-Keuangan-Q3.pdf</span>
-                
-                <span class="badge badge-shared" style="flex-shrink:0">S</span>
-                
-                <form method="POST" action="#" style="flex-shrink:0" onsubmit="return confirm('Hapus dokumen ini?')">
-                  <input type="hidden" name="csrf_token" value="preview">
-                  <button type="submit" class="btn-danger" style="height:28px;padding:0 8px" title="Hapus">
-                    <svg><use href="#ico-trash"/></svg>
-                  </button>
-                </form>
-              </div>
-              
-              <div style="display:flex;align-items:center;gap:10px;padding:0.75rem 1.5rem;border-top:1px solid var(--border);font-size:0.825rem">
-                <svg width="14" height="14" style="color:var(--cream-mid);flex-shrink:0"><use href="#ico-file"/></svg>
-                <span style="flex:1;font-weight:300;color:var(--ink-soft);overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="Kontrak-Vendor-2026.docx">Kontrak-Vendor-2026.docx</span>
-                
-                <form method="POST" action="#" style="flex-shrink:0" onsubmit="return confirm('Hapus dokumen ini?')">
-                  <input type="hidden" name="csrf_token" value="preview">
-                  <button type="submit" class="btn-danger" style="height:28px;padding:0 8px" title="Hapus">
-                    <svg><use href="#ico-trash"/></svg>
-                  </button>
-                </form>
-              </div>
-              
-              <div style="display:flex;align-items:center;gap:10px;padding:0.75rem 1.5rem;border-top:1px solid var(--border);font-size:0.825rem">
-                <svg width="14" height="14" style="color:var(--cream-mid);flex-shrink:0"><use href="#ico-file"/></svg>
-                <span style="flex:1;font-weight:300;color:var(--ink-soft);overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="Invoice-Maret.txt">Invoice-Maret.txt</span>
-                
-                <form method="POST" action="#" style="flex-shrink:0" onsubmit="return confirm('Hapus dokumen ini?')">
-                  <input type="hidden" name="csrf_token" value="preview">
-                  <button type="submit" class="btn-danger" style="height:28px;padding:0 8px" title="Hapus">
-                    <svg><use href="#ico-trash"/></svg>
-                  </button>
-                </form>
-              </div>
-              
-            
+            ${['laporan_keuangan_2024.docx','laporan_hrd_2024.docx','laporan_produk_datasync.docx','notulen_rapat_direksi_jan2025.docx','audit_eksternal_2024.docx','laporan_sales_q4_2024.docx','rencana_teknologi_2025.docx'].map((f,i)=>`
+            <div style="display:flex;align-items:center;gap:10px;padding:.7rem 1.5rem;border-top:1px solid var(--bdr);font-size:.825rem">
+              <svg width="13" height="13" style="color:var(--cl-m);flex-shrink:0"><use href="#i-file"/></svg>
+              <span style="flex:1;font-weight:300;color:var(--ink-s);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${f}</span>
+              ${i<3?'<span class="badge badge-shared" style="flex-shrink:0">S</span>':''}
+              <button type="button" class="btn-danger" style="height:26px;padding:0 7px"><svg><use href="#i-trash"/></svg></button>
+            </div>`).join('')}
           </div>
         </div>
+      </div>
 
+      <!-- ── DEMO SECTION ── -->
+      <div class="demo-divider">
+        <div class="demo-divider-line"></div>
+        <div class="demo-divider-label"><div class="demo-divider-dot"></div>Pilih Skenario Demo</div>
+        <div class="demo-divider-line"></div>
+      </div>
+
+      <p style="font-size:.78rem;color:var(--ink-m);font-weight:300;margin-bottom:.9rem;">Klik salah satu skenario untuk mengisi pertanyaan secara otomatis, lalu tekan <strong style="font-weight:500;color:var(--ink)">Tanya AI</strong> di atas.</p>
+
+      <div class="scenario-nav" id="sc-nav">
+        ${SC.map((s,i)=>`<button class="s-pill${i===0?' active':''}" onclick="selectSC(${i})"><span class="dot ${s.dot}"></span>${s.label}</button>`).join('')}
       </div>
     </div>
-  </div>
-</div>
+  </div>`;
 
+  /* QA button — jika query cocok skenario demo, jalankan pipeline demo */
+  document.getElementById('qa-btn').addEventListener('click', function(){
+    const v = document.getElementById('qa-inp').value.trim();
+    if(!v) return;
+    const matchIdx = SC.findIndex(s => s.query.trim() === v);
+    if(matchIdx >= 0){
+      curSC = matchIdx;
+      runDemo();
+    } else {
+      toast('Ini mode preview — pilih skenario demo di bawah untuk melihat hasil lengkap.');
+    }
+  });
 
-</div><div class="preview-page" data-page="dashboard" hidden>
+  /* scan demo */
+  const scInp=document.getElementById('sc-inp');
+  const scAdd=document.getElementById('sc-add');
+  const scSave=document.getElementById('sc-save');
+  const scName=document.getElementById('sc-name');
+  const scThumbs=document.getElementById('sc-thumbs');
+  let pages=[];
+  function renderThumbs(){
+    scThumbs.innerHTML=pages.map((p,i)=>`<div class="scan-thumb"><img src="${p}"><span class="scan-thumb-no">${i+1}</span><button class="scan-thumb-x" data-i="${i}">&times;</button></div>`).join('');
+    scSave.disabled=!pages.length;
+  }
+  scAdd.onclick=()=>scInp.click();
+  scInp.onchange=()=>{[...scInp.files].forEach(f=>pages.push(URL.createObjectURL(f)));scInp.value='';renderThumbs();};
+  scThumbs.addEventListener('click',e=>{const b=e.target.closest('[data-i]');if(b){pages.splice(+b.dataset.i,1);renderThumbs();}});
+  scSave.onclick=()=>{if(!scName.value.trim()){toast('Isi nama dokumen dulu');return;}toast(`"${scName.value}" tersimpan (${pages.length} hal.)`);pages=[];scName.value='';renderThumbs();};
+}
 
+function selectSC(idx){
+  curSC=idx;
+  document.querySelectorAll('.s-pill').forEach((p,i)=>p.classList.toggle('active',i===idx));
+  const inp=document.getElementById('qa-inp');
+  if(inp){
+    inp.value=SC[idx].query;
+    inp.style.color='var(--ink)';
+  }
+  document.getElementById('qa-ans').innerHTML='';
+  const qaBtn=document.getElementById('qa-btn');
+  if(qaBtn){qaBtn.innerHTML='<svg width="14" height="14"><use href="#i-send"/></svg> Tanya AI';}
+  const qaPanel=document.querySelector('.qa-panel');
+  if(qaPanel){qaPanel.scrollIntoView({behavior:'smooth',block:'start'});}
+}
 
-<div class="app-layout">
-  
-  <!-- Mobile top app bar (phones only) -->
-<header class="mobile-topbar">
-  <button class="nav-toggle" type="button" data-nav="open" aria-label="Buka menu">
-    <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
-  </button>
-  <svg class="topbar-wordmark" width="86" height="30" viewBox="0 0 182 64" aria-label="nade AI"><use href="#nade-wordmark"/></svg>
-</header>
+const STEP_D=[300,700,1100,1700,2800];
 
-<!-- Backdrop when drawer open -->
-<div class="nav-overlay" data-nav="close"></div>
+function runDemo(){
+  if(running)return;
+  running=true;
+  const qaBtn=document.getElementById('qa-btn');
+  if(qaBtn){qaBtn.disabled=true;qaBtn.innerHTML='<svg width="14" height="14" style="animation:spin .8s linear infinite"><use href="#i-refresh"/></svg> Memproses...';}
+  document.getElementById('qa-ans').innerHTML='';
+  const loader=document.getElementById('d-loader');
+  if(loader)loader.classList.add('show');
+  document.querySelectorAll('.d-step').forEach(el=>el.classList.remove('active','done'));
+  STEP_D.forEach((d,i)=>setTimeout(()=>{
+    document.querySelectorAll('.d-step').forEach((el,j)=>{
+      if(j<i)el.classList.add('done');
+      else if(j===i)el.classList.add('active');
+      else el.classList.remove('active','done');
+    });
+  },d));
+  setTimeout(()=>{
+    if(loader)loader.classList.remove('show');
+    document.querySelectorAll('.d-step').forEach(el=>el.classList.remove('active','done'));
+    renderDemoAnswer(SC[curSC]);
+    running=false;
+    if(qaBtn){qaBtn.disabled=false;qaBtn.innerHTML='<svg width="14" height="14"><use href="#i-send"/></svg> Tanya AI';}
+  }, SC[curSC].totalDelay);
+}
 
-<!-- Floating button to reopen sidebar when collapsed (desktop) -->
-<button class="nav-fab" type="button" data-nav="show" aria-label="Tampilkan menu">
-  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
-</button>
+function renderDemoAnswer(sc){
+  const slot=document.getElementById('qa-ans');
+  const maxT=Math.max(...sc.timing.map(t=>t.v));
 
-<!-- Sidebar -->
-<aside class="sidebar">
-  <div class="sidebar-header">
-    <div class="sidebar-brand-block">
-      <svg class="sidebar-wordmark" width="116" height="41" viewBox="0 0 182 64" aria-label="nade AI"><use href="#nade-wordmark"/></svg>
-      <small class="sidebar-brand-sub">Document Q&amp;A</small>
+  const simRows=sc.sims.map(s=>`
+  <div class="sim-row">
+    <div class="sim-name">${s.n}</div>
+    <div class="sim-track"><div class="sim-fill" style="--w:${Math.round(s.v*100)}%;width:${Math.round(s.v*100)}%"></div></div>
+    <div class="sim-val">${s.v.toFixed(2)}</div>
+  </div>`).join('');
+
+  const srcChips=sc.sources.map(s=>`<span class="src-chip">${s}</span>`).join('');
+
+  const conflictHTML=sc.noConflict
+    ?`<div class="ok-banner"><svg><use href="#i-check"/></svg>Tidak ada konflik terdeteksi — data konsisten di semua dokumen.</div>`
+    :`<div class="conflict-banner">
+        <div class="cb-hdr"><svg><use href="#i-warn"/></svg>Konflik Terdeteksi — ${sc.conflicts.length} konflik ditemukan</div>
+        ${sc.conflicts.map(c=>`<div class="c-item">
+          <div class="c-badges"><span class="c-sev sev-${c.sev.toLowerCase()}">${c.sev}</span><span class="c-type">${c.type}</span></div>
+          <div class="c-desc">${c.desc}</div>
+        </div>`).join('')}
+      </div>`;
+
+  const vMap={entailment:'cm-ent',neutral:'cm-neu',contradiction:'cm-con'};
+  const vLabel={entailment:'VERIFIED',neutral:'NEUTRAL',contradiction:'FLAGGED'};
+  const claimsHTML=sc.claims.map(cl=>`
+  <div class="claim-row">
+    <div class="claim-text">${cl.t}</div>
+    <div class="claim-meta">
+      <span class="cm ${vMap[cl.vd]}">${vLabel[cl.vd]}</span>
+      <span class="cm cm-ent">entail ${cl.ent}</span>
+      <span class="cm cm-con">contradict ${cl.con}</span>
+      <span class="cm cm-src">${cl.src}</span>
     </div>
-    <button class="nav-collapse-btn" type="button" data-nav="collapse" aria-label="Sembunyikan menu" title="Sembunyikan menu">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
-    </button>
-  </div>
+  </div>`).join('');
 
-  <nav class="sidebar-nav">
-    <div class="sidebar-section-label">Menu Utama</div>
-    <a href="#" class="sidebar-item ">
-      <svg><use href="#ico-home"/></svg> Tanya Dokumen
-    </a>
+  const timingHTML=sc.timing.map(t=>`
+  <div class="t-row">
+    <div class="t-label">${t.l}</div>
+    <div class="t-track"><div class="t-bar" style="width:${Math.round((t.v/maxT)*100)}%"></div></div>
+    <div class="t-val">${fmtMs(t.v)}</div>
+  </div>`).join('');
 
-    
-    <div class="sidebar-section-label">Admin</div>
-    <a href="#" class="sidebar-item active">
-      <svg><use href="#ico-grid"/></svg> Dashboard
-    </a>
-    <a href="#" class="sidebar-item ">
-      <svg><use href="#ico-users"/></svg> Users
-    </a>
-    <a href="#" class="sidebar-item ">
-      <svg><use href="#ico-docs"/></svg> Semua Dokumen
-    </a>
-    
-  </nav>
-
-  <div class="sidebar-user">
-    <div class="sidebar-avatar">D</div>
-    <div class="sidebar-user-info">
-      <div class="sidebar-user-name">Dhea</div>
-      <div class="sidebar-user-role">admin</div>
+  slot.innerHTML=`
+  <div class="a-card">
+    <div class="a-header">
+      <div class="a-icon"><svg width="16" height="16"><use href="#nade-mark"/></svg></div>
+      <span class="a-title">Jawaban Nade AI</span>
+      <span class="conf-badge ${sc.confClass}">${sc.conf} confidence</span>
+      <span class="exec-t">${fmtMs(sc.execMs)}</span>
     </div>
-    <a href="#" class="sidebar-logout" title="Logout">
-      <svg><use href="#ico-logout"/></svg>
-    </a>
-  </div>
-</aside>
+    <div class="tab-bar">
+      <div class="tab active" onclick="swTab(this,'jaw')">Jawaban</div>
+      <div class="tab" onclick="swTab(this,'src')">Sumber</div>
+      <div class="tab" onclick="swTab(this,'kon')">Konflik${sc.noConflict?' ✓':' ('+sc.conflicts.length+')'}</div>
+      <div class="tab" onclick="swTab(this,'kl')">Verifikasi Klaim</div>
+      <div class="tab" onclick="swTab(this,'tm')">Timing</div>
+    </div>
+    <div class="tab-panel active" data-tab="jaw">
+      <div class="a-body">${sc.answer}</div>
+      <div class="verif-row">
+        <span class="verif-label">Verifikasi Klaim:</span>
+        <span class="h-badge ${sc.hallClass}">${sc.hallStatus}</span>
+        <span class="verif-detail">— ${sc.hallDetail}</span>
+      </div>
+    </div>
+    <div class="tab-panel" data-tab="src">
+      <div class="src-wrap">
+        <div class="src-label">Dokumen yang digunakan</div>
+        <div class="src-chips">${srcChips}</div>
+        <div class="src-label">Similarity score</div>
+        ${simRows}
+      </div>
+    </div>
+    <div class="tab-panel" data-tab="kon">${conflictHTML}</div>
+    <div class="tab-panel" data-tab="kl"><div class="claims-wrap">${claimsHTML}</div></div>
+    <div class="tab-panel" data-tab="tm"><div class="timing-wrap">${timingHTML}</div></div>
+  </div>`;
+}
 
+function swTab(el,tab){
+  const card=el.closest('.a-card');
+  card.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  card.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
+  el.classList.add('active');
+  card.querySelector(`[data-tab="${tab}"]`).classList.add('active');
+}
+
+/* ── DASHBOARD ── */
+function buildDash(){
+  const root=document.getElementById('dash-root');
+  root.innerHTML=mkSidebar('dashboard')+`
   <div class="main-content">
     <div class="page-header">
-      <div>
-        <div class="page-title">Admin Dashboard</div>
-        <div class="page-subtitle">Overview sistem, statistik, dan riwayat query.</div>
-      </div>
-      <a href="#" class="btn-refresh">
-        <svg><use href="#ico-refresh"/></svg> Refresh
-      </a>
+      <div><div class="page-title">Admin Dashboard</div><div class="page-subtitle">Overview sistem, statistik, dan riwayat query.</div></div>
+      <button class="btn-refresh"><svg><use href="#i-refresh"/></svg> Refresh</button>
     </div>
-
     <div class="page-body">
-
-      <!-- STATS -->
       <div class="stats-grid">
-        <div class="stat-card">
-          <div class="stat-icon"><svg><use href="#ico-users"/></svg></div>
-          <div class="stat-label">Users</div>
-          <div class="stat-value">4</div>
-          <div class="stat-desc">3 aktif · 1 admin</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-icon"><svg><use href="#ico-docs"/></svg></div>
-          <div class="stat-label">Documents</div>
-          <div class="stat-value">12</div>
-          <div class="stat-desc">5 shared</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-icon"><svg><use href="#ico-search"/></svg></div>
-          <div class="stat-label">Queries</div>
-          <div class="stat-value">137</div>
-          <div class="stat-desc">18 dengan konflik</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-icon"><svg><use href="#ico-warning"/></svg></div>
-          <div class="stat-label">Conflicts</div>
-          <div class="stat-value">23</div>
-          <div class="stat-desc">total logged</div>
-        </div>
+        ${[['Users','4','3 aktif · 1 admin','i-users'],['Documents','7','4 shared','i-docs'],['Queries','42','12 dengan konflik','i-search'],['Conflicts','31','total logged','i-warn']].map(([l,v,d,ic])=>`
+        <div class="stat-card"><div class="stat-icon"><svg><use href="#${ic}"/></svg></div><div class="stat-label">${l}</div><div class="stat-value">${v}</div><div class="stat-desc">${d}</div></div>`).join('')}
       </div>
-
-      <!-- VECTOR STORE -->
       <div class="section-card">
-        <div class="section-card-header">
-          <span class="section-card-title">Vector Store</span>
-        </div>
+        <div class="section-card-header"><span class="section-card-title">Vector Store</span></div>
         <div class="section-card-body">
           <div class="vector-grid">
-            <div class="vector-item">
-              <div class="vector-item-label">Total Vectors</div>
-              <div class="vector-item-value">486</div>
-            </div>
-            <div class="vector-item">
-              <div class="vector-item-label">Dimension</div>
-              <div class="vector-item-value">384</div>
-            </div>
-            <div class="vector-item">
-              <div class="vector-item-label">Embedding Model</div>
-              <div class="vector-item-value mono">paraphrase-multilingual-MiniLM-L12-v2</div>
-            </div>
+            <div class="vector-item"><div class="vector-item-label">Total Vectors</div><div class="vector-item-value">98</div></div>
+            <div class="vector-item"><div class="vector-item-label">Dimension</div><div class="vector-item-value">384</div></div>
+            <div class="vector-item"><div class="vector-item-label">Embedding Model</div><div class="vector-item-value mono">paraphrase-multilingual-MiniLM-L12-v2</div></div>
           </div>
         </div>
       </div>
-
-      <!-- QUERY HISTORY -->
       <div class="section-card">
-        <div class="section-card-header">
-          <span class="section-card-title">Query History</span>
-          <span style="font-size:0.75rem;color:var(--ink-muted);font-weight:300">50 query terbaru</span>
-        </div>
+        <div class="section-card-header"><span class="section-card-title">Query History</span><span style="font-size:.75rem;color:var(--ink-m);font-weight:300">50 terbaru</span></div>
         <table class="data-table">
-          <thead>
-            <tr>
-              <th>Waktu</th>
-              <th>User</th>
-              <th>Query</th>
-              <th>Confidence</th>
-              <th>Conflict</th>
-              <th>Exec</th>
-            </tr>
-          </thead>
+          <thead><tr><th>Waktu</th><th>User</th><th>Query</th><th>Confidence</th><th>Conflict</th><th>Exec</th></tr></thead>
           <tbody>
-            
-              
-              <tr>
-                <td data-label="Waktu" style="white-space:nowrap">04 Jun 2026 09:12</td>
-                <td data-label="User">Dhea</td>
-                <td data-label="Query" style="max-width:300px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">Berapa total anggaran proyek tahun ini?</td>
-                <td data-label="Confidence">91%</td>
-                <td data-label="Conflict">
-                  
-                    <span style="color:var(--ink-muted);font-weight:300">—</span>
-                  
-                </td>
-                <td data-label="Exec" style="color:var(--ink-muted)">842ms</td>
-              </tr>
-              
-              <tr>
-                <td data-label="Waktu" style="white-space:nowrap">03 Jun 2026 16:40</td>
-                <td data-label="User">andi</td>
-                <td data-label="Query" style="max-width:300px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">Siapa vendor utama kontrak 2026?</td>
-                <td data-label="Confidence">78%</td>
-                <td data-label="Conflict">
-                  
-                    <span class="badge" style="background:rgba(180,50,50,0.1);color:#8B3333">Ya</span>
-                  
-                </td>
-                <td data-label="Exec" style="color:var(--ink-muted)">1203ms</td>
-              </tr>
-              
-              <tr>
-                <td data-label="Waktu" style="white-space:nowrap">03 Jun 2026 11:05</td>
-                <td data-label="User">andi</td>
-                <td data-label="Query" style="max-width:300px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">Apa kesimpulan laporan Q3?</td>
-                <td data-label="Confidence">64%</td>
-                <td data-label="Conflict">
-                  
-                    <span style="color:var(--ink-muted);font-weight:300">—</span>
-                  
-                </td>
-                <td data-label="Exec" style="color:var(--ink-muted)">965ms</td>
-              </tr>
-              
-            
+            ${[['06 Jun 2026 10:47','Dhea','Berapa laba bersih tahun 2024?','0%',true,'127920ms'],['06 Jun 2026 10:31','Dhea','Versi berapa DataSync Pro terbaru?','17%',true,'14320ms'],['06 Jun 2026 10:18','Dhea','Harga Enterprise DataSync Pro?','91%',false,'9840ms'],['05 Jun 2026 15:22','andi','Siapa CEO perusahaan?','73%',false,'11200ms']].map(([t,u,q,c,cf,e])=>`
+            <tr>
+              <td data-label="Waktu" style="white-space:nowrap;font-size:.78rem">${t}</td>
+              <td data-label="User">${u}</td>
+              <td data-label="Query" style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${q}</td>
+              <td data-label="Confidence">${c}</td>
+              <td data-label="Conflict">${cf?'<span class="badge" style="background:rgba(180,50,50,.1);color:var(--red)">Ya</span>':'<span style="color:var(--ink-m)">—</span>'}</td>
+              <td data-label="Exec" style="color:var(--ink-m)">${e}</td>
+            </tr>`).join('')}
           </tbody>
         </table>
       </div>
-
-    </div>
-  </div>
-</div>
-
-
-</div><div class="preview-page" data-page="users" hidden>
-
-
-<div class="app-layout">
-  
-  <!-- Mobile top app bar (phones only) -->
-<header class="mobile-topbar">
-  <button class="nav-toggle" type="button" data-nav="open" aria-label="Buka menu">
-    <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
-  </button>
-  <svg class="topbar-wordmark" width="86" height="30" viewBox="0 0 182 64" aria-label="nade AI"><use href="#nade-wordmark"/></svg>
-</header>
-
-<!-- Backdrop when drawer open -->
-<div class="nav-overlay" data-nav="close"></div>
-
-<!-- Floating button to reopen sidebar when collapsed (desktop) -->
-<button class="nav-fab" type="button" data-nav="show" aria-label="Tampilkan menu">
-  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
-</button>
-
-<!-- Sidebar -->
-<aside class="sidebar">
-  <div class="sidebar-header">
-    <div class="sidebar-brand-block">
-      <svg class="sidebar-wordmark" width="116" height="41" viewBox="0 0 182 64" aria-label="nade AI"><use href="#nade-wordmark"/></svg>
-      <small class="sidebar-brand-sub">Document Q&amp;A</small>
-    </div>
-    <button class="nav-collapse-btn" type="button" data-nav="collapse" aria-label="Sembunyikan menu" title="Sembunyikan menu">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
-    </button>
-  </div>
-
-  <nav class="sidebar-nav">
-    <div class="sidebar-section-label">Menu Utama</div>
-    <a href="#" class="sidebar-item ">
-      <svg><use href="#ico-home"/></svg> Tanya Dokumen
-    </a>
-
-    
-    <div class="sidebar-section-label">Admin</div>
-    <a href="#" class="sidebar-item ">
-      <svg><use href="#ico-grid"/></svg> Dashboard
-    </a>
-    <a href="#" class="sidebar-item active">
-      <svg><use href="#ico-users"/></svg> Users
-    </a>
-    <a href="#" class="sidebar-item ">
-      <svg><use href="#ico-docs"/></svg> Semua Dokumen
-    </a>
-    
-  </nav>
-
-  <div class="sidebar-user">
-    <div class="sidebar-avatar">D</div>
-    <div class="sidebar-user-info">
-      <div class="sidebar-user-name">Dhea</div>
-      <div class="sidebar-user-role">admin</div>
-    </div>
-    <a href="#" class="sidebar-logout" title="Logout">
-      <svg><use href="#ico-logout"/></svg>
-    </a>
-  </div>
-</aside>
-
-  <div class="main-content">
-    <div class="page-header">
-      <div>
-        <div class="page-title">Manage Users</div>
-        <div class="page-subtitle">Buat, lihat, dan kelola akun pengguna.</div>
-      </div>
-    </div>
-
-    <div class="page-body">
-      
-        
-      
-
-      <div class="form-split">
-
-        <!-- CREATE USER -->
-        <div class="section-card">
-          <div class="section-card-header">
-            <span class="section-card-title">Buat User Baru</span>
-          </div>
-          <div class="section-card-body">
-            <form method="POST" action="#">
-              <input type="hidden" name="csrf_token" value="preview">
-              <div class="form-group">
-                <label class="form-label">Username</label>
-                <input class="form-input" type="text" name="username" placeholder="username" required minlength="3">
-              </div>
-              <div class="form-group">
-                <label class="form-label">Email <span>— opsional</span></label>
-                <input class="form-input" type="email" name="email" placeholder="email@example.com">
-              </div>
-              <div class="form-group">
-                <label class="form-label">Password</label>
-                <input class="form-input" type="password" name="password" placeholder="min 6 karakter" required minlength="6">
-              </div>
-              <div class="form-group">
-                <label class="form-label">Role</label>
-                <select class="form-select" name="role">
-                  <option value="user">user</option>
-                  <option value="admin">admin</option>
-                </select>
-              </div>
-              <button class="btn-primary" type="submit" style="margin-top:0.5rem">
-                <svg width="14" height="14" style="display:inline;vertical-align:-2px;margin-right:4px"><use href="#ico-plus"/></svg>
-                Buat
-              </button>
-            </form>
-          </div>
-        </div>
-
-        <!-- USER LIST -->
-        <div class="section-card">
-          <div class="section-card-header">
-            <span class="section-card-title">Daftar User</span>
-            <span class="badge badge-user">3 total</span>
-          </div>
-          <table class="data-table">
-            <thead>
-              <tr>
-                <th>Username</th>
-                <th>Email</th>
-                <th>Role</th>
-                <th>Aksi</th>
-              </tr>
-            </thead>
-            <tbody>
-              
-              <tr>
-                <td data-label="Username" style="font-weight:500">Dhea</td>
-                <td data-label="Email" style="color:var(--ink-muted)">dhea@nade.ai</td>
-                <td data-label="Role">
-                  <span class="badge badge-admin">
-                    admin
-                  </span>
-                </td>
-                <td data-label="Aksi">
-                  
-                  <span style="font-size:0.75rem;color:var(--ink-muted);font-weight:300">—</span>
-                  
-                </td>
-              </tr>
-              
-              <tr>
-                <td data-label="Username" style="font-weight:500">andi</td>
-                <td data-label="Email" style="color:var(--ink-muted)">andi@example.com</td>
-                <td data-label="Role">
-                  <span class="badge badge-user">
-                    user
-                  </span>
-                </td>
-                <td data-label="Aksi">
-                  
-                  <form method="POST" action="#"
-                        onsubmit="return confirm('Hapus user andi?')">
-                    <input type="hidden" name="csrf_token" value="preview">
-                    <button type="submit" class="btn-danger">
-                      <svg><use href="#ico-trash"/></svg>
-                    </button>
-                  </form>
-                  
-                </td>
-              </tr>
-              
-              <tr>
-                <td data-label="Username" style="font-weight:500">siti</td>
-                <td data-label="Email" style="color:var(--ink-muted)">—</td>
-                <td data-label="Role">
-                  <span class="badge badge-user">
-                    user
-                  </span>
-                </td>
-                <td data-label="Aksi">
-                  
-                  <form method="POST" action="#"
-                        onsubmit="return confirm('Hapus user siti?')">
-                    <input type="hidden" name="csrf_token" value="preview">
-                    <button type="submit" class="btn-danger">
-                      <svg><use href="#ico-trash"/></svg>
-                    </button>
-                  </form>
-                  
-                </td>
-              </tr>
-              
-            </tbody>
-          </table>
-        </div>
-
-      </div>
-    </div>
-  </div>
-</div>
-
-
-</div><div class="preview-page" data-page="documents" hidden>
-
-
-<div class="app-layout">
-  
-  <!-- Mobile top app bar (phones only) -->
-<header class="mobile-topbar">
-  <button class="nav-toggle" type="button" data-nav="open" aria-label="Buka menu">
-    <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
-  </button>
-  <svg class="topbar-wordmark" width="86" height="30" viewBox="0 0 182 64" aria-label="nade AI"><use href="#nade-wordmark"/></svg>
-</header>
-
-<!-- Backdrop when drawer open -->
-<div class="nav-overlay" data-nav="close"></div>
-
-<!-- Floating button to reopen sidebar when collapsed (desktop) -->
-<button class="nav-fab" type="button" data-nav="show" aria-label="Tampilkan menu">
-  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
-</button>
-
-<!-- Sidebar -->
-<aside class="sidebar">
-  <div class="sidebar-header">
-    <div class="sidebar-brand-block">
-      <svg class="sidebar-wordmark" width="116" height="41" viewBox="0 0 182 64" aria-label="nade AI"><use href="#nade-wordmark"/></svg>
-      <small class="sidebar-brand-sub">Document Q&amp;A</small>
-    </div>
-    <button class="nav-collapse-btn" type="button" data-nav="collapse" aria-label="Sembunyikan menu" title="Sembunyikan menu">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
-    </button>
-  </div>
-
-  <nav class="sidebar-nav">
-    <div class="sidebar-section-label">Menu Utama</div>
-    <a href="#" class="sidebar-item ">
-      <svg><use href="#ico-home"/></svg> Tanya Dokumen
-    </a>
-
-    
-    <div class="sidebar-section-label">Admin</div>
-    <a href="#" class="sidebar-item ">
-      <svg><use href="#ico-grid"/></svg> Dashboard
-    </a>
-    <a href="#" class="sidebar-item ">
-      <svg><use href="#ico-users"/></svg> Users
-    </a>
-    <a href="#" class="sidebar-item active">
-      <svg><use href="#ico-docs"/></svg> Semua Dokumen
-    </a>
-    
-  </nav>
-
-  <div class="sidebar-user">
-    <div class="sidebar-avatar">D</div>
-    <div class="sidebar-user-info">
-      <div class="sidebar-user-name">Dhea</div>
-      <div class="sidebar-user-role">admin</div>
-    </div>
-    <a href="#" class="sidebar-logout" title="Logout">
-      <svg><use href="#ico-logout"/></svg>
-    </a>
-  </div>
-</aside>
-
-  <div class="main-content">
-    <div class="page-header">
-      <div>
-        <div class="page-title">Semua Dokumen</div>
-        <div class="page-subtitle">Lihat seluruh dokumen yang terindex di sistem.</div>
-      </div>
-      <a href="#" class="btn-refresh">
-        <svg><use href="#ico-refresh"/></svg> Refresh
-      </a>
-    </div>
-
-    <div class="page-body">
-      <div class="section-card">
-        <table class="data-table">
-          <thead>
-            <tr>
-              <th>ID</th>
-              <th>Filename</th>
-              <th>Owner</th>
-              <th>Kata</th>
-              <th>Visibility</th>
-              <th>Dibuat</th>
-              <th>Aksi</th>
-            </tr>
-          </thead>
-          <tbody>
-            
-              
-              <tr>
-                <td data-label="ID" style="color:var(--ink-muted);font-family:monospace;font-size:0.75rem">1</td>
-                <td data-label="Filename" style="font-weight:400;max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">
-                  <svg width="12" height="12" style="color:var(--cream-mid);margin-right:6px;vertical-align:-1px"><use href="#ico-file"/></svg>
-                  Laporan-Keuangan-Q3.pdf
-                </td>
-                <td data-label="Owner">Dhea</td>
-                <td data-label="Kata" style="font-variant-numeric:tabular-nums">4,820</td>
-                <td data-label="Visibility">
-                  
-                    <span class="badge badge-shared">Shared</span>
-                  
-                </td>
-                <td data-label="Dibuat" style="white-space:nowrap;color:var(--ink-muted)">28 May 2026</td>
-                <td data-label="Aksi">
-                  <form method="POST" action="#"
-                        onsubmit="return confirm('Hapus dokumen ini?')">
-                    <input type="hidden" name="csrf_token" value="preview">
-                    <button type="submit" class="btn-danger">
-                      <svg><use href="#ico-trash"/></svg>
-                    </button>
-                  </form>
-                </td>
-              </tr>
-              
-              <tr>
-                <td data-label="ID" style="color:var(--ink-muted);font-family:monospace;font-size:0.75rem">2</td>
-                <td data-label="Filename" style="font-weight:400;max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">
-                  <svg width="12" height="12" style="color:var(--cream-mid);margin-right:6px;vertical-align:-1px"><use href="#ico-file"/></svg>
-                  Kontrak-Vendor-2026.docx
-                </td>
-                <td data-label="Owner">andi</td>
-                <td data-label="Kata" style="font-variant-numeric:tabular-nums">2,310</td>
-                <td data-label="Visibility">
-                  
-                    <span style="font-size:0.75rem;color:var(--ink-muted);font-weight:300">Private</span>
-                  
-                </td>
-                <td data-label="Dibuat" style="white-space:nowrap;color:var(--ink-muted)">30 May 2026</td>
-                <td data-label="Aksi">
-                  <form method="POST" action="#"
-                        onsubmit="return confirm('Hapus dokumen ini?')">
-                    <input type="hidden" name="csrf_token" value="preview">
-                    <button type="submit" class="btn-danger">
-                      <svg><use href="#ico-trash"/></svg>
-                    </button>
-                  </form>
-                </td>
-              </tr>
-              
-              <tr>
-                <td data-label="ID" style="color:var(--ink-muted);font-family:monospace;font-size:0.75rem">3</td>
-                <td data-label="Filename" style="font-weight:400;max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">
-                  <svg width="12" height="12" style="color:var(--cream-mid);margin-right:6px;vertical-align:-1px"><use href="#ico-file"/></svg>
-                  Invoice-Maret.txt
-                </td>
-                <td data-label="Owner">andi</td>
-                <td data-label="Kata" style="font-variant-numeric:tabular-nums">540</td>
-                <td data-label="Visibility">
-                  
-                    <span style="font-size:0.75rem;color:var(--ink-muted);font-weight:300">Private</span>
-                  
-                </td>
-                <td data-label="Dibuat" style="white-space:nowrap;color:var(--ink-muted)">01 Jun 2026</td>
-                <td data-label="Aksi">
-                  <form method="POST" action="#"
-                        onsubmit="return confirm('Hapus dokumen ini?')">
-                    <input type="hidden" name="csrf_token" value="preview">
-                    <button type="submit" class="btn-danger">
-                      <svg><use href="#ico-trash"/></svg>
-                    </button>
-                  </form>
-                </td>
-              </tr>
-              
-            
-          </tbody>
-        </table>
-      </div>
-    </div>
-  </div>
-</div>
-
-
-</div>
-<nav id="preview-switch"><button data-pg="login">Login</button><button data-pg="register">Register</button><button data-pg="qa">Tanya Dokumen</button><button data-pg="dashboard">Admin Dashboard</button><button data-pg="users">Users</button><button data-pg="documents">Documents</button></nav>
-<script>
-function toast(m,t){const e=document.getElementById('toast');e.textContent=m;e.className=t==='error'?'show toast-error':'show';clearTimeout(e._t);e._t=setTimeout(()=>e.classList.remove('show'),2800);}
-
-// sidebar drawer (mobile) + collapse (desktop)
-document.addEventListener('click',e=>{const el=e.target.closest('[data-nav]');if(!el)return;
-  const a=el.dataset.nav, b=document.body;
-  if(a==='open')b.classList.add('nav-open');
-  else if(a==='close')b.classList.remove('nav-open');
-  else if(a==='collapse')b.classList.add('nav-collapsed');
-  else if(a==='show')b.classList.remove('nav-collapsed');
-});
-document.addEventListener('click',e=>{if(e.target.closest('.sidebar-item')&&document.body.classList.contains('nav-open'))document.body.classList.remove('nav-open');});
-
-// page switcher
-const sw=document.getElementById('preview-switch');
-function showPage(pg){
-  document.querySelectorAll('.preview-page').forEach(p=>p.hidden=p.dataset.page!==pg);
-  sw.querySelectorAll('button').forEach(x=>x.classList.toggle('active',x.dataset.pg===pg));
-  window.scrollTo(0,0);
-}
-sw.addEventListener('click',e=>{const b=e.target.closest('button');if(b)showPage(b.dataset.pg);});
-showPage('qa');
-
-// make in-app sidebar links navigate within the preview (by label)
-const LABEL_PAGE={'Tanya Dokumen':'qa','Dashboard':'dashboard','Users':'users','Semua Dokumen':'documents'};
-document.addEventListener('click',e=>{const it=e.target.closest('.sidebar-item');if(!it)return;
-  const pg=LABEL_PAGE[it.textContent.trim()];if(pg)showPage(pg);});
-
-// block real navigation in preview
-document.addEventListener('click',e=>{const a=e.target.closest('a[href="#"]');if(a)e.preventDefault();});
-
-// ── "Tanya AI" demo: render a sample answer ──
-const SAMPLE = {
-  answer: "Berdasarkan <strong>Laporan-Keuangan-Q3.pdf</strong>, total anggaran proyek tahun ini adalah <strong>Rp 4.250.000.000</strong>, dengan realisasi 68% per akhir kuartal ketiga. Sisa anggaran sebesar Rp 1,36 miliar dialokasikan untuk tahap implementasi Q4.",
-  confidence: 0.91,
-  sources: ["Laporan-Keuangan-Q3.pdf", "Invoice-Maret.txt"],
-  exec: 842
-};
-function answerHTML(d){
-  const pct=Math.round(d.confidence*100);
-  const cls=d.confidence>=0.7?'conf-high':d.confidence>=0.4?'conf-mid':'conf-low';
-  const src=d.sources.map(s=>`<div style="font-size:.8rem;color:var(--cream-dark);font-weight:300;margin-bottom:2px">— ${s}</div>`).join('');
-  return `<div class="qa-panel" id="demo-answer">
-    <div class="qa-panel-header">
-      <div class="qa-panel-icon" style="background:var(--cream-lightest)"><svg style="color:var(--ink)"><use href="#nade-mark"/></svg></div>
-      <span class="qa-panel-title">Jawaban Nade AI</span>
-      <span class="confidence-badge ${cls}">${pct}% confidence</span>
-      <span style="margin-left:8px;font-size:.7rem;color:var(--ink-muted);font-weight:300">${d.exec}ms</span>
-    </div>
-    <div style="padding:1.5rem;font-size:.875rem;font-weight:300;line-height:1.8;color:var(--ink-soft)">${d.answer}</div>
-    <div style="padding:0 1.5rem 1rem;border-top:1px solid var(--border);padding-top:1rem">
-      <div style="font-size:.65rem;text-transform:uppercase;letter-spacing:.1em;color:var(--ink-muted);margin-bottom:.5rem">Sumber</div>${src}
-    </div>
-    <div class="hallucination-row">
-      <span class="hall-label">Verifikasi Klaim:</span>
-      <span class="hall-status hall-verified">VERIFIED</span>
-      <span style="font-size:.75rem;color:var(--ink-muted);font-weight:300">— 3 dari 3 klaim terverifikasi oleh dokumen sumber</span>
     </div>
   </div>`;
 }
-const qform=document.getElementById('qa-form');
-if(qform){
-  qform.addEventListener('submit',ev=>{
-    ev.preventDefault();
-    const inp=document.getElementById('qa-input');
-    if(!inp.value.trim()) inp.value='Berapa total anggaran proyek tahun ini?';
-    const btn=qform.querySelector('.btn-ask'); const old=btn.innerHTML;
-    btn.disabled=true; btn.textContent='Memproses…';
-    document.getElementById('demo-answer')?.remove();
-    setTimeout(()=>{
-      qform.closest('.qa-main').insertAdjacentHTML('beforeend',answerHTML(SAMPLE));
-      btn.disabled=false; btn.innerHTML=old;
-      document.getElementById('demo-answer').scrollIntoView({behavior:'smooth',block:'nearest'});
-    },850);
-  });
+
+/* ── USERS ── */
+function buildUsers(){
+  const root=document.getElementById('users-root');
+  root.innerHTML=mkSidebar('users')+`
+  <div class="main-content">
+    <div class="page-header"><div><div class="page-title">Manage Users</div><div class="page-subtitle">Buat, lihat, dan kelola akun pengguna.</div></div></div>
+    <div class="page-body">
+      <div class="form-split">
+        <div class="section-card">
+          <div class="section-card-header"><span class="section-card-title">Buat User Baru</span></div>
+          <div class="section-card-body">
+            <div class="form-group"><label class="form-label">Username</label><input class="form-input" type="text" placeholder="username"></div>
+            <div class="form-group"><label class="form-label">Email <span>— opsional</span></label><input class="form-input" type="email" placeholder="email@example.com"></div>
+            <div class="form-group"><label class="form-label">Password</label><input class="form-input" type="password" placeholder="min 6 karakter"></div>
+            <div class="form-group"><label class="form-label">Role</label><select class="form-select"><option>user</option><option>admin</option></select></div>
+            <button class="btn-primary" type="button">Buat</button>
+          </div>
+        </div>
+        <div class="section-card">
+          <div class="section-card-header"><span class="section-card-title">Daftar User</span><span class="badge badge-user">3 total</span></div>
+          <table class="data-table">
+            <thead><tr><th>Username</th><th>Email</th><th>Role</th><th>Aksi</th></tr></thead>
+            <tbody>
+              <tr><td data-label="Username" style="font-weight:500">Dhea</td><td data-label="Email" style="color:var(--ink-m)">dhea@nade.ai</td><td data-label="Role"><span class="badge badge-admin">admin</span></td><td data-label="Aksi"><span style="font-size:.75rem;color:var(--ink-m)">—</span></td></tr>
+              <tr><td data-label="Username" style="font-weight:500">andi</td><td data-label="Email" style="color:var(--ink-m)">andi@example.com</td><td data-label="Role"><span class="badge badge-user">user</span></td><td data-label="Aksi"><button type="button" class="btn-danger"><svg><use href="#i-trash"/></svg></button></td></tr>
+              <tr><td data-label="Username" style="font-weight:500">siti</td><td data-label="Email" style="color:var(--ink-m)">—</td><td data-label="Role"><span class="badge badge-user">user</span></td><td data-label="Aksi"><button type="button" class="btn-danger"><svg><use href="#i-trash"/></svg></button></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>`;
 }
 
-// ── lightweight scan demo (thumbnails + retake) ──
-(function(){
-  const inp=document.getElementById('scan-input'),add=document.getElementById('scan-add'),
-        save=document.getElementById('scan-save'),thumbs=document.getElementById('scan-thumbs'),
-        name=document.getElementById('scan-name');
-  if(!inp)return; let pages=[];
-  function render(){thumbs.innerHTML=pages.map((p,i)=>`<div class="scan-thumb"><img src="${p}"><span class="scan-thumb-no">${i+1}</span></div>`).join('');save.disabled=!pages.length;}
-  add.onclick=()=>inp.click();
-  inp.onchange=()=>{[...inp.files].forEach(f=>pages.push(URL.createObjectURL(f)));inp.value='';render();};
-  save.onclick=()=>{if(!name.value.trim()){toast('Isi nama dokumen dulu.','error');return;}toast(`Demo: "${name.value}" (${pages.length} halaman) akan di-OCR & disimpan di aplikasi nyata.`);pages=[];name.value='';render();};
-})();
+/* ── DOCUMENTS ── */
+function buildDocs(){
+  const root=document.getElementById('docs-root');
+  root.innerHTML=mkSidebar('documents')+`
+  <div class="main-content">
+    <div class="page-header">
+      <div><div class="page-title">Semua Dokumen</div><div class="page-subtitle">Seluruh dokumen yang terindex di sistem.</div></div>
+      <button class="btn-refresh"><svg><use href="#i-refresh"/></svg> Refresh</button>
+    </div>
+    <div class="page-body">
+      <div class="section-card">
+        <table class="data-table">
+          <thead><tr><th>ID</th><th>Filename</th><th>Owner</th><th>Kata</th><th>Vis.</th><th>Chunks</th><th>Aksi</th></tr></thead>
+          <tbody>
+            ${[['1','laporan_keuangan_2024.docx','Dhea','612',true,'3'],['2','laporan_hrd_2024.docx','Dhea','589',true,'3'],['3','laporan_produk_datasync.docx','Dhea','541',true,'3'],['4','notulen_rapat_direksi_jan2025.docx','Dhea','448',true,'2'],['5','audit_eksternal_2024.docx','Dhea','523',false,'3'],['6','laporan_sales_q4_2024.docx','andi','467',false,'2'],['7','rencana_teknologi_2025.docx','andi','598',false,'3']].map(([id,fn,own,wc,sh,ch])=>`
+            <tr>
+              <td data-label="ID" style="font-family:monospace;font-size:.72rem;color:var(--ink-m)">${id}</td>
+              <td data-label="Filename" style="font-size:.78rem"><svg width="11" height="11" style="color:var(--cl-m);margin-right:4px;vertical-align:-1px"><use href="#i-file"/></svg>${fn}</td>
+              <td data-label="Owner">${own}</td>
+              <td data-label="Kata">${wc}</td>
+              <td data-label="Vis.">${sh?'<span class="badge badge-shared">S</span>':'<span style="font-size:.72rem;color:var(--ink-m)">—</span>'}</td>
+              <td data-label="Chunks" style="color:var(--ink-m)">${ch}</td>
+              <td data-label="Aksi"><button type="button" class="btn-danger" style="height:26px;padding:0 7px"><svg><use href="#i-trash"/></svg></button></td>
+            </tr>`).join('')}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>`;
+}
+
+/* ── PAGE NAV ── */
+const PAGES=['login','register','qa','dashboard','users','documents'];
+function showPage(pg){
+  PAGES.forEach(p=>{const el=document.querySelector(`.preview-page[data-page="${p}"]`);if(el)el.hidden=(p!==pg);});
+  document.querySelectorAll('#preview-switch button').forEach(b=>b.classList.toggle('active',b.dataset.pg===pg));
+  window.scrollTo(0,0);
+  document.body.classList.remove('nav-open');
+}
+document.getElementById('preview-switch').addEventListener('click',e=>{const b=e.target.closest('button');if(b)showPage(b.dataset.pg);});
+
+/* sidebar nav + data-nav */
+document.addEventListener('click',e=>{
+  const pg=e.target.closest('[data-pg]');if(pg&&!pg.closest('#preview-switch'))showPage(pg.dataset.pg);
+  const nav=e.target.closest('[data-nav]');if(!nav)return;
+  const a=nav.dataset.nav,body=document.body;
+  if(a==='open')body.classList.add('nav-open');
+  else if(a==='close')body.classList.remove('nav-open');
+  else if(a==='collapse')body.classList.add('nav-collapsed');
+  else if(a==='show')body.classList.remove('nav-collapsed');
+});
+document.addEventListener('keydown',e=>{if(e.key==='Escape')document.body.classList.remove('nav-open');});
+
+function toast(m){const t=document.getElementById('toast');t.textContent=m;t.className='show';clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove('show'),2500);}
+
+/* ── INIT ── */
+buildQA();
+buildDash();
+buildUsers();
+buildDocs();
+showPage('qa');
 </script>
 </body>
 </html>

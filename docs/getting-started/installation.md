@@ -1,109 +1,175 @@
 # Instalasi
 
-## 1. Clone Repository
-
-```bash
-git clone <repo-url>
-cd tugas-ai
-```
+Pilih platform:
+- [Linux (Ubuntu)](#linux)
+- [Windows](#windows)
 
 ---
 
-## 2. Buat Virtual Environment
+## Linux
+
+### 1. System Dependencies
+
+```bash
+sudo apt update && sudo apt upgrade -y
+
+sudo apt install -y \
+  python3 python3-venv python3-pip git \
+  tesseract-ocr tesseract-ocr-ind tesseract-ocr-eng \
+  libgl1 libglib2.0-0t64 libsm6 libxrender1 libxext6
+```
+
+### 2. Clone & Masuk Direktori
+
+```bash
+git clone <repo-url>
+cd nadeai
+```
+
+### 3. Virtual Environment
 
 ```bash
 python3 -m venv venv
 source venv/bin/activate
 ```
 
----
-
-## 3. Install Dependencies
+### 4. Install Dependencies
 
 ```bash
 pip install -r requirements.txt
 ```
 
-> Proses ini mengunduh semua library Python yang dibutuhkan (~300MB).
-
----
-
-## 4. Konfigurasi `.env`
-
-Buat file `.env` di root project:
+### 5. Konfigurasi .env
 
 ```bash
-cp .env.example .env   # jika tersedia
-# atau buat manual:
+cp .env.example .env
 nano .env
 ```
 
-Isi file `.env`:
-
+Wajib diisi:
 ```env
-FLASK_ENV=development
-FLASK_HOST=0.0.0.0
-FLASK_PORT=5000
-SECRET_KEY=ganti-dengan-string-acak-panjang
-
-DATABASE_URL=sqlite:///data/app.db
-MAX_FILE_SIZE_MB=100
-
-LLM_PROVIDER=groq
-LLM_MODEL=llama-3.1-8b-instant
-GROQ_API_KEY=gsk_XXXXXXXXXXXXXXXXXXXX
-
-EMBEDDING_MODEL=paraphrase-multilingual-MiniLM-L12-v2
-
-HALLUCINATION_THRESHOLD=0.6
-TOP_K_DOCUMENTS=5
-SIMILARITY_MIN_THRESHOLD=0.15
-
-SESSION_EXPIRE_HOURS=24
-LOG_LEVEL=INFO
-
-ADMIN_USERNAME=admin
-ADMIN_PASSWORD=admin123
-ADMIN_EMAIL=admin@local
+GROQ_API_KEY=gsk_xxxxxxxxxxxxxxxxxxxx
+SECRET_KEY=ganti-dengan-string-acak-minimal-32-karakter
 ```
 
-> **Penting:** Ganti `GROQ_API_KEY` dengan API key dari [console.groq.com](https://console.groq.com).
-> Ganti `SECRET_KEY` dengan string acak panjang untuk keamanan sesi.
-
----
-
-## 5. Buat Folder yang Diperlukan
+### 6. Buat Folder & Init Database
 
 ```bash
 mkdir -p data/{documents,uploads} logs
-```
-
----
-
-## 6. Inisialisasi Database
-
-```bash
 python3 -c "from models.database import init_db; init_db()"
 ```
 
-Output yang diharapkan:
+Output: `Database initialized successfully.`
+
+### 7. Jalankan
+
+```bash
+python3 app.py
 ```
-Database initialized. Tables: users, documents, embeddings_cache, query_history, sessions, conflicts_log
-Admin user created: admin
-```
+
+Buka browser: `http://localhost:5000` — login `admin` / `admin123`
 
 ---
 
-## 7. Verifikasi Instalasi
+## Windows
 
-```bash
-python3 -c "
-import config
-print('LLM Provider:', config.LLM_PROVIDER)
-print('LLM Model:', config.LLM_MODEL)
-print('Groq Key:', config.GROQ_API_KEY[:10] + '...')
-print('DB:', config.DATABASE_URL)
-"
+### 1. Install Python 3.12
+
+Download: https://www.python.org/downloads/release/python-3120/
+
+Pilih **Windows installer (64-bit)**. Centang **Add Python to PATH** saat install.
+
+Verifikasi:
+```powershell
+python --version
+# Python 3.12.x
 ```
 
-Jika muncul nilai yang benar, instalasi selesai. Lanjut ke **Cara Menjalankan**.
+### 2. Install Tesseract OCR
+
+Download: https://github.com/UB-Mannheim/tesseract/wiki
+
+Pilih versi terbaru 64-bit. Saat install centang **Indonesian** dan **English**. Catat path install (default: `C:\Program Files\Tesseract-OCR\`).
+
+Tambahkan ke PATH jika belum otomatis:
+```
+System Properties → Environment Variables → Path → New:
+C:\Program Files\Tesseract-OCR\
+```
+
+Verifikasi: `tesseract --version`
+
+### 3. Clone & Masuk Direktori
+
+```powershell
+git clone <repo-url>
+cd nadeai
+```
+
+### 4. Virtual Environment
+
+```powershell
+py -3.12 -m venv venv
+.\venv\Scripts\Activate.ps1
+```
+
+Jika error ExecutionPolicy:
+```powershell
+Set-ExecutionPolicy -Scope Process -ExecutionPolicy RemoteSigned
+.\venv\Scripts\Activate.ps1
+```
+
+### 5. Install Dependencies
+
+```powershell
+pip install -r requirements.txt
+```
+
+### 6. Konfigurasi .env
+
+```powershell
+copy .env.example .env
+notepad .env
+```
+
+Wajib diisi:
+```env
+GROQ_API_KEY=gsk_xxxxxxxxxxxxxxxxxxxx
+SECRET_KEY=ganti-dengan-string-acak-minimal-32-karakter
+```
+
+### 7. Buat Folder & Init Database
+
+```powershell
+mkdir data\documents, data\uploads, logs
+python -c "from models.database import init_db; init_db()"
+```
+
+Output: `Database initialized successfully.`
+
+### 8. Jalankan
+
+```powershell
+python app.py
+```
+
+Buka browser: `http://localhost:5000` — login `admin` / `admin123`
+
+---
+
+## Verifikasi Instalasi
+
+```bash
+# Linux
+python3 -c "import config; print('LLM:', config.LLM_PROVIDER, config.LLM_MODEL)"
+
+# Windows
+python -c "import config; print('LLM:', config.LLM_PROVIDER, config.LLM_MODEL)"
+```
+
+Output: `LLM: groq llama-3.1-8b-instant`
+
+Health check setelah app jalan:
+```bash
+curl http://localhost:5000/health
+```

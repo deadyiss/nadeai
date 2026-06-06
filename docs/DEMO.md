@@ -1,359 +1,215 @@
-# Demo — RAG System dengan Deteksi Konflik & Halusinasi
+# Demo Guide — Nade AI
 
-Dokumen ini berisi panduan lengkap untuk melakukan demo sistem, termasuk skenario dokumen, pertanyaan, dan interpretasi output yang diharapkan.
+Panduan lengkap untuk melakukan demo sistem menggunakan 7 dokumen fiktif PT Teknologi Maju Indonesia yang sengaja berisi data bertentangan antar divisi.
 
 ---
 
-## Persiapan Demo
+## Persiapan
 
 ### 1. Jalankan Aplikasi
 
+**Linux:**
 ```bash
-cd /home/deadyiss/Downloads/tugas-ai
+cd /path/ke/nadeai
 source venv/bin/activate
 python3 app.py
 ```
 
-Tunggu hingga muncul:
-```
-Bootstrap complete.
- * Running on http://127.0.0.1:5000
+**Windows:**
+```powershell
+cd C:\path\ke\nadeai
+.\venv\Scripts\Activate.ps1
+python app.py
 ```
 
-Buka browser: `http://localhost:5000`
-Login: `admin` / `admin123`
+Tunggu output:
+```
+Bootstrap selesai.
+Server berjalan: http://0.0.0.0:5000
+```
+
+Buka browser: `http://localhost:5000` — login `admin` / `admin123`
 
 ---
 
 ### 2. Upload Dokumen Demo
 
-Buat dan upload 7 dokumen berikut via halaman web (drag & drop ke upload zone, centang **Shared**).
+Semua file demo ada di folder `demo_docs/`. Upload ketujuh file berikut via halaman utama — centang **Shared** agar semua user bisa mengakses.
 
-> Semua dokumen membahas perusahaan fiktif **PT Teknologi Maju Indonesia** dengan data yang sengaja saling bertentangan antar divisi.
+| File | Isi | Tanggal |
+|------|-----|---------|
+| `laporan_keuangan_2024.docx` | Laporan tahunan divisi Keuangan | 31 Des 2024 |
+| `laporan_hrd_2024.docx` | Laporan SDM divisi HR | 15 Jan 2025 |
+| `laporan_produk_datasync.docx` | Status produk DataSync Pro | 20 Jan 2025 |
+| `notulen_rapat_direksi_jan2025.docx` | Keputusan resmi direksi | 10 Jan 2025 |
+| `audit_eksternal_2024.docx` | Temuan auditor independen | 25 Jan 2025 |
+| `laporan_sales_q4_2024.docx` | Performa sales Q4 | Des 2024 |
+| `rencana_teknologi_2025.docx` | Roadmap engineering | 8 Jan 2025 |
+
+Upload satu per satu, tunggu notifikasi "berhasil diupload" setiap kali sebelum lanjut ke file berikutnya.
 
 ---
 
-## Dokumen Demo
+## Konflik yang Ditanam
 
-### Dokumen 1 — `laporan_keuangan_2024.docx`
+Ini adalah konflik yang sengaja dibuat antar dokumen — inilah yang akan dideteksi sistem:
+
+| Topik | Laporan Keuangan | HRD / Direksi | Audit |
+|-------|-----------------|---------------|-------|
+| Jumlah karyawan | 340 | 312 | 318 |
+| Laba bersih 2024 | Rp 12M | Rp 10,5M | Rp 9,8M |
+| Total aset | Rp 95M | — | Rp 90M |
+| Versi DataSync Pro | 4.2 | 4.3 | — |
+| Target rekrutmen | 80 orang | 60 orang | — |
+| Kantor aktif | 3 (Bdg masih ada) | 2 (Bdg tutup Mar '24) | — |
+| Pengguna berbayar | 12.500 (termasuk trial) | 9.800 (berbayar saja) | 8.900 |
+
+---
+
+## 10 Pertanyaan Demo
+
+Urutan direkomendasikan dari yang paling bersih ke yang paling konfliktual.
+
+---
+
+### 1. Siapa CEO dan jajaran direksi perusahaan?
+
+**Ketik:** `Siapa CEO dan jajaran direksi PT Teknologi Maju Indonesia?`
+
+**Jawaban yang diharapkan:** CEO Andi Wijaya, CFO Sri Mulyani, CTO Budi Hartono, COO Dewi Santoso, VP Sales Reza Akbar.
+
+**Yang menarik untuk ditunjukkan:** Jawaban faktual benar. Confidence mungkin rendah karena konflik sistemik di dokumen lain, bukan karena data direksi salah. Ini contoh bahwa **confidence rendah ≠ jawaban salah**.
+
+---
+
+### 2. Berapa harga paket DataSync Pro Enterprise?
+
+**Ketik:** `Berapa harga langganan DataSync Pro paket Enterprise?`
+
+**Jawaban yang diharapkan:** Rp 5 juta per bulan.
+
+**Yang menarik untuk ditunjukkan:** Confidence relatif tinggi karena data ini konsisten di semua dokumen. Tunjukkan ini sebagai baseline "sistem berjalan normal".
+
+---
+
+### 3. Berapa pengguna aktif DataSync Pro?
+
+**Ketik:** `Berapa jumlah pengguna aktif DataSync Pro saat ini?`
+
+**Jawaban yang diharapkan:** Sistem menyebut 9.800 berbayar atau 12.500 total — tergantung chunk yang di-retrieve.
+
+**Yang menarik untuk ditunjukkan:** Sistem idealnya menjelaskan perbedaan: 12.500 = berbayar + trial, 9.800 = berbayar aktif, 8.900 = berbayar ≥3 bulan berturut-turut. Buka tab **Konflik** untuk lihat VALUE_CONFLICT terdeteksi.
+
+---
+
+### 4. Versi berapa DataSync Pro yang terkini?
+
+**Ketik:** `DataSync Pro versi berapa yang terbaru sekarang dan kapan dirilis?`
+
+**Jawaban yang diharapkan:** Versi 4.3, rilis 10 November 2024.
+
+**Yang menarik untuk ditunjukkan:** Confidence rendah karena laporan keuangan menyebut v4.2 (data lama). Buka tab **Konflik** — TEMPORAL_CONFLICT muncul karena dua tanggal berbeda (Agustus vs November 2024). Status hallucination: VERIFIED karena fakta v4.3 memang ada di dokumen.
+
+---
+
+### 5. Di kota mana saja perusahaan memiliki kantor?
+
+**Ketik:** `Di kota mana saja PT Teknologi Maju Indonesia punya kantor aktif?`
+
+**Jawaban yang diharapkan:** Jakarta dan Surabaya aktif; Bandung sudah tutup sejak Maret 2024; Medan rencana Q3 2025.
+
+**Yang menarik untuk ditunjukkan:** Laporan keuangan (data lama) menyebut 3 kantor termasuk Bandung. HRD dan notulen direksi mengkonfirmasi Bandung sudah tutup. Sistem harus pilih data terbaru — tunjukkan TEMPORAL_CONFLICT di tab Konflik.
+
+---
+
+### 6. Berapa jumlah karyawan perusahaan?
+
+**Ketik:** `Berapa total karyawan PT Teknologi Maju Indonesia?`
+
+**Jawaban yang diharapkan:** 312 orang (keputusan resmi direksi), meski laporan lain menyebut 340 atau 318.
+
+**Yang menarik untuk ditunjukkan:** Ini salah satu pertanyaan dengan konflik paling banyak. Buka tab **Konflik** — VALUE_CONFLICT HIGH dengan 3 angka berbeda. Confidence sangat rendah atau 0%. Tunjukkan ini ke audiens: sistem jujur mengakui data bertentangan.
+
+---
+
+### 7. Berapa laba bersih perusahaan tahun 2024?
+
+**Ketik:** `Berapa laba bersih PT Teknologi Maju Indonesia tahun 2024?`
+
+**Jawaban yang diharapkan:** Jawaban akan menyebut salah satu dari: Rp 12M (keuangan), Rp 10,5M (direksi), atau Rp 9,8M (audit).
+
+**Yang menarik untuk ditunjukkan:** Confidence 0%. Tiga sumber berbeda, semua otoritatif. Buka tab **Konflik** — 5 konflik terdeteksi. Buka tab **Verifikasi Klaim** — lihat entailment dan contradiction score per kalimat jawaban. **Ini adalah showcase utama sistem.**
+
+---
+
+### 8. Kapan rencana rilis DataSync Pro v5.0?
+
+**Ketik:** `Kapan DataSync Pro versi 5.0 akan dirilis?`
+
+**Jawaban yang diharapkan:** Q2 2025 (target Juni), dengan kemungkinan mundur hingga Q3 2025 (September).
+
+**Yang menarik untuk ditunjukkan:** TEMPORAL_CONFLICT — dua dokumen menyebut timeline berbeda (Juni vs September). Status FLAGGED karena ada range waktu. Ini contoh pertanyaan dengan jawaban yang memang tidak pasti secara dokumen.
+
+---
+
+### 9. Berapa target rekrutmen karyawan baru 2025?
+
+**Ketik:** `Berapa target rekrutmen karyawan baru PT Teknologi Maju Indonesia di tahun 2025?`
+
+**Jawaban yang diharapkan:** 60 orang (keputusan resmi direksi), bukan 80 seperti di laporan keuangan.
+
+**Yang menarik untuk ditunjukkan:** VALUE_CONFLICT antara 80 (keuangan, data awal) vs 60 (direksi, keputusan final). Tunjukkan bahwa notulen rapat direksi adalah dokumen paling otoritatif — dan sistem mengambil jawaban dari sana.
+
+---
+
+### 10. Apa hasil temuan utama audit eksternal?
+
+**Ketik:** `Apa temuan utama auditor eksternal tentang keuangan perusahaan tahun 2024?`
+
+**Jawaban yang diharapkan:** Pendapatan aktual Rp 45,7M (selisih Rp 2,3M dari laporan), laba bersih Rp 9,8M, opini WDP atas PSAK 72.
+
+**Yang menarik untuk ditunjukkan:** Pertanyaan yang diarahkan ke sumber spesifik. Jawaban benar, tapi confidence 0% karena konflik dengan semua laporan internal. Status FLAGGED. Ini contoh: pertanyaan tepat + sumber tepat + jawaban benar + confidence tetap rendah karena konteks dokumen keseluruhan penuh konflik.
+
+---
+
+## Alur Presentasi yang Disarankan
 
 ```
-LAPORAN KEUANGAN TAHUNAN 2024
-PT Teknologi Maju Indonesia
-Divisi: Keuangan & Akuntansi | Tanggal: 31 Desember 2024
+1. Upload semua dokumen (~3 menit)
+   └─ Tunjukkan progress "14 chunks" dll di notifikasi
 
-Total pendapatan 2024: Rp 48 miliar
-Laba bersih 2024: Rp 12 miliar
-Jumlah karyawan: 340 orang (rata-rata gaji Rp 64,7 juta/tahun)
-Kantor: Jakarta, Surabaya, Bandung (3 kantor)
-Total aset: Rp 95 miliar (gedung Jakarta: Rp 40 miliar)
-Produk: DataSync Pro versi 4.2 (diluncurkan Agustus 2024)
-Pengguna aktif DataSync Pro: 12.500 perusahaan
-Harga langganan Enterprise: Rp 5 juta/bulan
-Target 2025: pendapatan Rp 60 miliar, rekrut 80 karyawan baru
-Ekspansi: buka kantor Medan dan Makassar
+2. Pertanyaan 2 — harga Enterprise        (confidence tinggi, no conflict)
+   └─ "Ini cara sistem bekerja normal"
+
+3. Pertanyaan 7 — laba bersih             (showcase utama, 5 konflik)
+   └─ Buka tab Konflik + Verifikasi Klaim
+   └─ "Inilah mengapa kita butuh conflict detection"
+
+4. Pertanyaan 4 — versi DataSync Pro      (VERIFIED + confidence rendah)
+   └─ "Verified bukan berarti tidak ada masalah di dokumen lain"
+
+5. Pertanyaan 6 — jumlah karyawan         (3 angka berbeda)
+   └─ "Confidence 0% bukan berarti jawaban salah"
+
+6. Pertanyaan 10 — temuan audit           (directed source question)
+   └─ "Pertanyaan spesifik ke sumber yang tepat"
+
+7. Pertanyaan 1 — direksi                 (factual correct, low confidence)
+   └─ "Takeaway: selalu baca tab Konflik dan Verifikasi Klaim"
 ```
 
 ---
 
-### Dokumen 2 — `laporan_hrd_2024.docx`
-
-```
-LAPORAN SUMBER DAYA MANUSIA 2024
-PT Teknologi Maju Indonesia
-Divisi: Human Resources | Tanggal: 15 Januari 2025
-
-Total karyawan aktif: 312 orang (bukan 340 seperti diklaim keuangan)
-Rincian: 180 engineer, 65 sales, 42 operasional, 25 manajerial
-Turnover rate 2024: 8,2% (28 orang resign, 45 orang masuk)
-Gaji rata-rata: Rp 8,5 juta/bulan (total kompensasi Rp 9,2 juta/bulan)
-Total pengeluaran gaji 2024: Rp 25 miliar (keuangan sebut Rp 22 miliar)
-Kantor aktif: Jakarta dan Surabaya (Bandung tutup Maret 2024)
-Budget pelatihan: Rp 1,2 miliar, 18.500 jam pelatihan, 156 sertifikat
-Target rekrutmen 2025: 60 orang (bukan 80 seperti diklaim keuangan)
-Fokus: 40 backend engineer, 15 data scientist, 5 product manager
-```
-
----
-
-### Dokumen 3 — `laporan_produk_datasync.docx`
-
-```
-LAPORAN PRODUK DATASYNC PRO
-PT Teknologi Maju Indonesia
-Divisi: Product & Engineering | Tanggal: 20 Januari 2025
-
-Versi terkini: DataSync Pro 4.3 (bukan 4.2 — dirilis 10 November 2024)
-Riwayat: v4.0 (5 Jan 2023), v4.2 (15 Ags 2024), v4.3 (10 Nov 2024)
-Pengguna berbayar aktif: 9.800 perusahaan
-Pengguna trial (belum bayar): 2.700 perusahaan
-Total semua user: 12.500 (angka yang diklaim laporan keuangan)
-Harga Starter: Rp 1,5 juta/bulan
-Harga Professional: Rp 3 juta/bulan
-Harga Enterprise: Rp 5 juta/bulan
-Roadmap: versi 5.0 rencana rilis Q2 2025 (April-Juni)
-Target akhir 2025: 15.000 pelanggan berbayar
-```
-
----
-
-### Dokumen 4 — `notulen_rapat_direksi_jan2025.docx`
-
-```
-NOTULEN RAPAT DIREKSI
-PT Teknologi Maju Indonesia
-Tanggal: 10 Januari 2025 | Lokasi: Kantor Pusat Jakarta
-Peserta: CEO (Andi Wijaya), CFO (Sri Mulyani), CTO (Budi Hartono),
-         COO (Dewi Santoso), VP Sales (Reza Akbar)
-
-KEPUTUSAN:
-- Jumlah karyawan resmi: 312 orang (mengikuti data HRD, bukan keuangan)
-- Laba bersih 2024 (setelah koreksi pajak Rp 1,5 miliar): Rp 10,5 miliar
-- Versi produk terkini dikonfirmasi: DataSync Pro 4.3
-- Pengguna berbayar aktif: 9.800 perusahaan
-- Target rekrutmen 2025: 60 orang
-- Ekspansi hanya ke Medan (bukan Medan + Makassar), target Q3 2025
-- Anggaran ekspansi: Rp 3,5 miliar
-- Total anggaran operasional 2025: Rp 42 miliar
-- Alokasi R&D 2025: Rp 9 miliar (naik dari Rp 6 miliar)
-- Versi 5.0: target Q2 2025, buffer hingga Q3 jika ada kendala teknis
-```
-
----
-
-### Dokumen 5 — `audit_eksternal_2024.docx`
-
-```
-LAPORAN AUDIT EKSTERNAL
-PT Teknologi Maju Indonesia
-Auditor: KAP Santoso & Rekan | Tanggal: 25 Januari 2025
-
-TEMUAN:
-1. Pendapatan aktual per PSAK 72: Rp 45,7 miliar (selisih Rp 2,3 miliar dari laporan)
-2. Laba bersih setelah audit: Rp 9,8 miliar
-   (keuangan: Rp 12M → direksi koreksi: Rp 10,5M → audit: Rp 9,8M)
-3. Karyawan terverifikasi dari daftar gaji: 318 orang
-   (termasuk 6 karyawan kontrak yang tidak tercatat HRD)
-4. Aset gedung Jakarta revaluasi: Rp 35 miliar (bukan Rp 40 miliar)
-   Total aset terkoreksi: Rp 90 miliar (laporan: Rp 95 miliar)
-5. Pengguna berbayar ≥3 bulan berturut-turut: 8.900 perusahaan
-   Pengguna yang bayar minimal 1 kali: 10.200 perusahaan
-6. Kantor aktif: Jakarta (penuh) + Surabaya (40% kapasitas)
-
-OPINI: Wajar Dengan Pengecualian (WDP) atas isu PSAK 72
-```
-
----
-
-### Dokumen 6 — `laporan_sales_q4_2024.docx`
-
-```
-LAPORAN SALES & MARKETING Q4 2024
-PT Teknologi Maju Indonesia
-Periode: Oktober - Desember 2024
-
-Kontrak baru Q4: 87 perusahaan (nilai: Rp 5,2 miliar)
-Total pelanggan (berbayar + trial): 12.500
-Berbayar: 9.800 | Trial: 2.700
-Churn rate Q4: 2,1% (kehilangan 210 pelanggan)
-Tim sales: 35 orang, target 5 kontrak/orang, pencapaian 2,5 kontrak (50%)
-Sales terbaik: Ahmad Fauzi (12 kontrak, Rp 720 juta)
-Pipeline Q1 2025: 450 prospek, estimasi konversi 30% (~135 pelanggan baru)
-Kompetitor: Sinkron.id (Rp 2 juta/bulan, tumbuh 40% YoY)
-Kehilangan 3 enterprise client besar ke Sinkron.id
-```
-
----
-
-### Dokumen 7 — `rencana_teknologi_2025.docx`
-
-```
-RENCANA PENGEMBANGAN TEKNOLOGI 2025
-PT Teknologi Maju Indonesia
-Divisi: Engineering & CTO Office | Tanggal: 8 Januari 2025
-
-Roadmap:
-- v4.3 (sudah rilis Nov 2024): stabil, minor bug fixes
-- v4.4 (rencana Feb 2025): +50 konektor baru
-- v5.0 (rencana Juni 2025): natural language query, AI assistant
-- Buffer v5.0: bisa mundur hingga September 2025
-
-Infrastruktur: AWS Singapore (utama) + GCP Taiwan (backup)
-Cloud cost 2024: Rp 850 juta/bulan | Target 2025: Rp 700 juta/bulan
-
-Tim engineering: 180 orang
-Backend: 95 | Frontend: 45 | DevOps: 20 | QA: 20
-Rekrutmen teknis 2025: 40 backend + 15 data scientist = 55 orang
-(catatan: rekrutmen teknis saja sudah 55 dari total target 60 orang HRD)
-
-Bug backlog: 847 isu (237 critical, 410 medium, 200 low)
-Target sebelum v5.0: kurangi critical bugs ke <50
-
-Ancaman: Sinkron.id agresif di segmen mid-market, tumbuh 40% YoY
-```
-
----
-
-## 10 Pertanyaan Demo & Output yang Diharapkan
-
----
-
-### 1. Berapa jumlah karyawan PT Teknologi Maju Indonesia saat ini?
-
-**Jawaban yang diharapkan:** 312 orang (dari notulen direksi sebagai keputusan resmi)
-
-| Output | Nilai | Penjelasan |
-|--------|-------|------------|
-| Confidence | ~46% | Ada konflik: 340 (keuangan) vs 312 (HRD/direksi) vs 318 (audit) |
-| Halusinasi | NO_CLAIMS / VERIFIED | Jawaban singkat, faktual |
-| Konflik | 4-5 konflik | VALUE_CONFLICT antar dokumen |
-
-**Poin demo:** Sistem memilih angka dari notulen direksi karena paling otoritatif (keputusan resmi), bukan dari laporan keuangan yang lebih dulu dibuat.
-
----
-
-### 2. Berapa laba bersih perusahaan tahun 2024?
-
-**Jawaban yang diharapkan:** Rp 10,5 miliar (dari notulen direksi, setelah koreksi pajak)
-
-| Output | Nilai | Penjelasan |
-|--------|-------|------------|
-| Confidence | 0% | 3 angka berbeda: Rp 12M, Rp 10,5M, Rp 9,8M |
-| Halusinasi | FLAGGED | Klaim ada di dokumen tapi dikontradiksi dokumen lain |
-| Konflik | 5 konflik | VALUE_CONFLICT berat |
-
-**Poin demo:** Confidence 0% bukan berarti salah — sistem jujur bahwa data sangat bertentangan. Auditor menyebut Rp 9,8M, direksi Rp 10,5M, laporan awal Rp 12M.
-
----
-
-### 3. Versi berapa DataSync Pro yang terkini dan kapan diluncurkan?
-
-**Jawaban yang diharapkan:** Versi 4.3, diluncurkan 10 November 2024
-
-| Output | Nilai | Penjelasan |
-|--------|-------|------------|
-| Confidence | ~17% | Konflik dengan laporan keuangan yang menyebut v4.2 |
-| Halusinasi | VERIFIED ✅ | Fakta terdukung kuat di laporan produk + notulen |
-| Konflik | 5 konflik | TEMPORAL (tanggal berbeda antar dokumen) |
-
-**Poin demo:** Meski confidence rendah karena konflik umum, status VERIFIED menunjukkan klaim spesifik ini terdukung dokumen.
-
----
-
-### 4. Berapa pengguna aktif DataSync Pro?
-
-**Jawaban yang diharapkan:** 9.800 perusahaan (berbayar aktif)
-
-| Output | Nilai | Penjelasan |
-|--------|-------|------------|
-| Confidence | ~42% | Konflik: 12.500 (keuangan/sales) vs 9.800 (produk/direksi) |
-| Halusinasi | VERIFIED ✅ | |
-| Konflik | 0-1 konflik | Tergantung chunk yang di-retrieve |
-
-**Poin demo:** Sistem menjelaskan perbedaan: 12.500 termasuk trial, 9.800 adalah berbayar. Ini contoh query yang jawabannya tepat tapi angkanya ambigu.
-
----
-
-### 5. Di kota mana saja PT Teknologi Maju Indonesia memiliki kantor?
-
-**Jawaban yang diharapkan:** Jakarta dan Surabaya (aktif); Bandung tutup Maret 2024; Medan rencana Q3 2025
-
-| Output | Nilai | Penjelasan |
-|--------|-------|------------|
-| Confidence | ~7% | Laporan keuangan sebut 3 kantor (salah) |
-| Halusinasi | VERIFIED ✅ | |
-| Konflik | 5 konflik | TEMPORAL + VALUE conflict |
-
-**Poin demo:** Laporan keuangan ketinggalan informasi penutupan kantor Bandung. Notulen dan HRD lebih akurat.
-
----
-
-### 6. Kapan rencana peluncuran DataSync Pro versi 5.0?
-
-**Jawaban yang diharapkan:** Q2 2025 (Juni), dengan kemungkinan mundur ke Q3 2025 (September)
-
-| Output | Nilai | Penjelasan |
-|--------|-------|------------|
-| Confidence | ~8% | Tanggal berbeda di tiap dokumen |
-| Halusinasi | FLAGGED | Klaim "Q2" ada tapi ada dokumen yang menyebut buffer Q3 |
-| Konflik | 5 konflik | TEMPORAL_CONFLICT |
-
-**Poin demo:** Contoh pertanyaan dengan jawaban yang memang tidak pasti karena dokumen sendiri memberikan range waktu.
-
----
-
-### 7. Berapa target rekrutmen karyawan baru tahun 2025?
-
-**Jawaban yang diharapkan:** 60 orang (keputusan resmi direksi), bukan 80 seperti di laporan keuangan
-
-| Output | Nilai | Penjelasan |
-|--------|-------|------------|
-| Confidence | ~6% | Konflik: 80 (keuangan) vs 60 (HRD/direksi) |
-| Halusinasi | VERIFIED ✅ | |
-| Konflik | 4 konflik | VALUE_CONFLICT |
-
-**Poin demo:** Laporan keuangan dibuat lebih awal sebelum keputusan final direksi. Sistem memilih data yang lebih baru dan otoritatif.
-
----
-
-### 8. Apa hasil temuan audit eksternal terkait laba bersih perusahaan?
-
-**Jawaban yang diharapkan:** Rp 9,8 miliar setelah koreksi PSAK 72
-
-| Output | Nilai | Penjelasan |
-|--------|-------|------------|
-| Confidence | 0% | Konflik berat dengan semua laporan internal |
-| Halusinasi | FLAGGED | Klaim ada di dokumen audit tapi dikontradiksi dokumen lain |
-| Konflik | 4 konflik | VALUE_CONFLICT |
-
-**Poin demo:** Pertanyaan spesifik ke sumber tertentu (audit). Jawaban benar dari konteks pertanyaan, tapi confidence tetap 0% karena konflik sistemik.
-
----
-
-### 9. Berapa total aset perusahaan?
-
-**Jawaban yang diharapkan:** Rp 90 miliar (setelah revaluasi auditor); laporan internal menyebut Rp 95 miliar
-
-| Output | Nilai | Penjelasan |
-|--------|-------|------------|
-| Confidence | 0% | Rp 95M (keuangan) vs Rp 90M (audit) |
-| Halusinasi | FLAGGED | |
-| Konflik | 4 konflik | VALUE_CONFLICT |
-
-**Poin demo:** Perbedaan karena revaluasi gedung Jakarta: laporan keuangan Rp 40M, auditor nilai wajar Rp 35M.
-
----
-
-### 10. Siapa CEO dan jajaran direksi PT Teknologi Maju Indonesia?
-
-**Jawaban yang diharapkan:** CEO Andi Wijaya, CFO Sri Mulyani, CTO Budi Hartono, COO Dewi Santoso, VP Sales Reza Akbar
-
-| Output | Nilai | Penjelasan |
-|--------|-------|------------|
-| Confidence | 0% | Konflik umum antar dokumen menyebabkan penalty besar |
-| Halusinasi | FLAGGED | Jawaban panjang (list), beberapa klaim neutral di NLI |
-| Konflik | 5 konflik | |
-
-**Poin demo:** Jawaban faktual benar, tapi confidence 0% karena penalty konflik dari VALUE_CONFLICT di dokumen lain. Ini menunjukkan bahwa confidence rendah bukan selalu berarti jawaban salah.
-
----
-
-## Ringkasan Pola Output untuk Demo
-
-| Pola | Contoh Pertanyaan | Pesan Demo |
-|------|-------------------|------------|
-| **VERIFIED + Confidence tinggi** | Pengguna aktif DataSync Pro | Data konsisten, tidak ada konflik pada pertanyaan spesifik ini |
-| **VERIFIED + Confidence rendah** | Versi DataSync Pro terkini | Fakta benar tapi lingkungan dokumen penuh konflik |
-| **FLAGGED + Konflik banyak** | Laba bersih 2024 | Data sangat bertentangan, perlu verifikasi manual |
-| **NO_CLAIMS** | Pertanyaan dengan refusal | AI jujur tidak ada info cukup, tidak mengarang |
-| **Confidence 0%** | Hampir semua | Bukan berarti salah — bisa karena banyak konflik |
-
----
-
-## Tips Presentasi
-
-1. **Mulai dengan pertanyaan 4** (pengguna aktif) — confidence relatif tinggi, jawaban bersih, tidak ada konflik. Tunjukkan sistem bekerja normal dulu.
-2. **Lanjut pertanyaan 2** (laba bersih) — langsung terlihat 3 angka berbeda dan sistem mendeteksi konflik berat.
-3. **Pertanyaan 10** (direksi) — tunjukkan bahwa FLAGGED tidak selalu berarti salah; jawabannya benar, tapi NLI tidak yakin karena kalimat panjang.
-4. **Buka tab Konflik** — tunjukkan deskripsi TEMPORAL_CONFLICT dan VALUE_CONFLICT secara visual di UI.
-5. **Buka tab Verifikasi Klaim** — tunjukkan score entailment per kalimat jawaban.
+## Cara Membaca Output
+
+| Indikator | Nilai | Interpretasi |
+|-----------|-------|-------------|
+| Confidence | ≥ 70% | Jawaban kuat, dokumen konsisten |
+| Confidence | 0% | Konflik berat — cek tab Konflik |
+| Hallucination | VERIFIED | Klaim terbukti ada di dokumen |
+| Hallucination | FLAGGED | Klaim tidak terdukung atau dikontradiksi |
+| Hallucination | NO_CLAIMS | AI refusal (tidak mengarang) — ini aman |
+| Konflik | HIGH | Perlu verifikasi manual ke dokumen asli |
+| Konflik | MEDIUM | Potensi inkonsistensi, tidak selalu salah |
+
+**Pesan kunci untuk audiens:** Confidence 0% bukan kegagalan sistem — itu kejujuran sistem bahwa data sumber memang bertentangan. Ini lebih baik dari AI yang memberikan jawaban palsu dengan confidence tinggi.

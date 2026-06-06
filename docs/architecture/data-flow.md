@@ -1,121 +1,113 @@
 # Data Flow
 
-## 1. Upload Document Flow
+## 1. Upload Dokumen
 
 ```
-FILE INPUT (PDF/DOCX/TXT)            IMAGE INPUT (foto/scan)
-        │                                      │
-        ▼                                      ▼
-Flask POST /api/upload               Flask POST /api/upload
-        │                                      │
-        ▼                                      ▼
-DocumentProcessor                    OCR Engine
-├─ Validate file (ext + size)        ├─ OpenCV preprocess
-├─ Extract text                      │   ├─ Grayscale
-│   ├─ PDF  → pypdf                  │   ├─ Denoise
-│   ├─ DOCX → python-docx            │   └─ Threshold
-│   └─ TXT  → open() UTF-8          ├─ RapidOCR (utama)
-└─ Clean text                        └─ pytesseract (fallback)
-        │                                      │
-        └──────────────┬────────────────────────┘
+FILE (PDF/DOCX/TXT)              IMAGE (foto/scan)
+        │                                │
+        ▼                                ▼
+Flask POST /upload               Flask POST /upload
+        │                                │
+        ▼                                ▼
+FileValidator                    OCREngine
+├─ Cek ekstensi + ukuran         ├─ OpenCV preprocess
+└─ Sanitize filename             │   └─ grayscale → denoise → threshold
+        │                        ├─ RapidOCR (handwriting-friendly)
+        ▼                        └─ pytesseract (printed text)
+DocumentProcessor                       │ pilih score terbaik
+├─ PDF  → pypdf                         │
+│   └─ fallback OCR jika < 50 char      │
+├─ DOCX → python-docx                   │
+└─ TXT  → open() UTF-8                  │
+        │                               │
+        └──────────────┬────────────────┘
                        ▼
-             Text Chunker
-       chunk_text(size=300, overlap=50)
-       → [chunk_0, chunk_1, ..., chunk_n]
-                       │
-                       ▼ (per chunk)
-              Embedding Engine
-    paraphrase-multilingual-MiniLM-L12-v2
-    chunk_text → 384-dim normalized vector
+             text_cleaner.clean_text()
                        │
                        ▼
-               Vector Store (RAM)
-       _vectors[doc_id] = np.ndarray
-       _meta[doc_id] = {filename, user_id, ...}
+             chunk_text(size=300, overlap=50)
+             → [chunk_0, chunk_1, ..., chunk_n]
+                       │
+              (per chunk, loop)
                        │
                        ▼
-                 SQLite DB
-       INSERT documents (chunk_index, chunk_total)
-       INSERT embeddings_cache
+             EmbeddingEngine.encode(chunk)
+             → 384-dim normalized float32 vector
+                       │
+                       ▼
+             VectorStore.add(doc, session)
+             ├─ _vectors[doc_id] = vec (RAM)
+             ├─ _meta[doc_id] = {...}
+             └─ INSERT embeddings_cache (SQLite)
+                       │
+                       ▼
+             INSERT documents (SQLite)
+             chunk_index=i, chunk_total=n
 ```
 
 ---
 
-## 2. Query Processing Flow
+## 2. Query Pipeline
 
 ```
-User: "Berapa anggaran proyek SmartCity?"
+User input: "Berapa anggaran proyek SmartCity?"
         │
         ▼
-Flask POST /api/query
+Flask POST /  (HTML form) atau POST /api/query (JSON API)
         │
         ▼
-Auth Check (Bearer token valid? role?)
+Auth check (session token valid? expired?)
         │
         ▼
-Query Processor
+QueryProcessor.process(query, user_id, include_shared)
         │
-        ├─ STEP 1: Embed query → 384-dim vector
-        │          ~5ms
+        ├─ [1] EMBED QUERY                    ~5ms
+        │      EmbeddingEngine.encode(query)
+        │      → 384-dim vector
         │
-        ├─ STEP 2: Similarity Search (Vector Store)
-        │   ├─ dot product: query_vec @ all_chunk_vecs
-        │   ├─ Filter: chunk user + shared, sim >= 0.15
-        │   └─ Return top-K chunks (auto: 3/5/7 by doc count)
-        │   ~100-500ms
+        ├─ [2] SIMILARITY SEARCH              ~100-500ms
+        │      VectorStore.search(query_vec)
+        │      ├─ Filter: user docs + shared docs
+        │      ├─ dot product: query_vec @ chunk_matrix
+        │      ├─ Filter: sim >= 0.15 (SIMILARITY_MIN_THRESHOLD)
+        │      └─ Top-K: auto (≤3 docs→3, 4-10→5, >10→7)
         │
-        ├─ STEP 3: Conflict Detection
-        │   ├─ TEMPORAL: beda tanggal antar dokumen → HIGH
-        │   ├─ VALUE: beda nilai angka (Rp, %, dll) → HIGH
-        │   └─ MULTI_SOURCE: topik dari ≥3 doc high-sim → MEDIUM
-        │   <1ms
+        ├─ [3] CONFLICT DETECTION             <1ms
+        │      ConflictDetector.detect(hits)
+        │      ├─ TEMPORAL_CONFLICT: beda tanggal antar dok → HIGH
+        │      ├─ VALUE_CONFLICT: beda angka > 10% → HIGH
+        │      └─ MULTI_SOURCE: ≥3 dok sim ≥ 0.5 → MEDIUM
         │
-        ├─ STEP 4: LLM Generation (Groq API)
-        │   ├─ System prompt: jawab 1-3 kalimat, cite sumber
-        │   ├─ User message: [DOCUMENTS] + [QUESTION]
-        │   └─ Model: llama-3.1-8b-instant, temp=0.2, max=300 token
-        │   ~400-800ms
+        ├─ [4] LLM GENERATION                 ~400-800ms (Groq)
+        │      LLMEngine.answer(query, context_chunks)
+        │      ├─ Build prompt: system + [DOCUMENTS] + [QUESTION]
+        │      └─ llama-3.1-8b-instant, temp=0.2, max_tokens=300
         │
-        └─ STEP 5: Hallucination Check (NLI, lokal CPU)
-            ├─ Extract claims dari jawaban (split kalimat)
-            ├─ Per claim:
-            │   ├─ Gate: cosine_sim < 0.35 → skip NLI (FLAGGED)
-            │   └─ NLI: mDeBERTa(premise=chunk, hypothesis=claim)
-            │       ├─ entailment ≥ 0.5 → VERIFIED
-            │       ├─ contradiction ≥ 0.5 → FLAGGED
-            │       └─ neutral → FLAGGED
-            └─ overall_score = 1 - avg(entailment_scores)
-            ~6-15 detik (CPU)
+        └─ [5] HALLUCINATION CHECK            ~6-15s (NLI CPU)
+               HallucinationChecker.check(answer, chunks)
+               ├─ Extract claims (split kalimat)
+               └─ Per claim:
+                   ├─ Gate: sim < 0.35 → FLAGGED (no_context), skip NLI
+                   └─ NLI: mDeBERTa(premise=chunk, hypothesis=claim)
+                       ├─ entailment ≥ 0.5  → VERIFIED
+                       ├─ contradiction ≥ 0.5 → FLAGGED
+                       └─ neutral           → FLAGGED
         │
         ▼
 Confidence Score
   base = avg(chunk similarities)
   score = base × (1 - hallucination_score)
   if has_conflict: score -= 0.2
-  clamp(0, 1)
+  clamp(0.0, 1.0)
         │
         ▼
-INSERT query_history + conflicts_log
+INSERT query_history + conflicts_log (SQLite)
         │
         ▼
-RESPONSE JSON:
+Response (JSON atau HTML template):
 {
-  "answer": "...",
-  "sources": [...],
-  "confidence": 0.72,
-  "has_conflict": true,
-  "conflict_details": [...],
-  "hallucination": {
-    "status": "VERIFIED|FLAGGED|NO_CLAIMS",
-    "overall_score": 0.12,
-    "claims": [...]
-  },
-  "stages": {
-    "search_ms": 210,
-    "conflict_ms": 0.5,
-    "llm_ms": 513,
-    "hallucination_ms": 8200
-  }
+  answer, sources, confidence, has_conflict,
+  conflict_details, hallucination, execution_time_ms, stages
 }
 ```
 
@@ -125,22 +117,22 @@ RESPONSE JSON:
 
 ```
 REGISTER:
-input → validate → hash password (PBKDF2)
-     → INSERT users → return success
+POST /register → validate → hash password (PBKDF2)
+              → INSERT users → flash success → redirect /login
 
 LOGIN:
-input → SELECT user → verify password
-     → create token (32-byte hex)
-     → INSERT sessions (expires: 24 jam)
-     → return token
+POST /login → SELECT user → check_password_hash
+           → INSERT sessions (token, expires_at = now+24h)
+           → session["token"] = token → redirect /
 
 LOGOUT:
-token → DELETE sessions WHERE token = ?
+GET /logout → DELETE sessions WHERE token = ?
+           → session.clear() → redirect /login
 
-REQUEST AUTH CHECK:
-Authorization: Bearer <token>
+REQUEST (setiap halaman protected):
+Cookie session["token"]
 → SELECT session WHERE token = ? AND expires_at > now()
-→ get user role → proceed / 401
+→ SELECT user → CurrentUser object → inject ke template / route
 ```
 
 ---
@@ -148,22 +140,21 @@ Authorization: Bearer <token>
 ## 4. Document Chunking
 
 ```
-Dokumen besar (misal PDF 3000 kata)
+PDF 3405 kata
         │
         ▼
 chunk_text(text, chunk_size=300, overlap=50)
+step = 300 - 50 = 250
+
+┌─────────────────────────────────────┐
+│ chunk_0 : kata 0   - 299            │ → doc_id=11, chunk_index=0
+│ chunk_1 : kata 250 - 549            │ → doc_id=12, chunk_index=1
+│ chunk_2 : kata 500 - 799            │ → doc_id=13, chunk_index=2
+│ ...                                 │
+│ chunk_13: kata 3250 - 3405          │ → doc_id=24, chunk_index=13
+└─────────────────────────────────────┘
         │
-        ▼
-┌───────────────────────────────┐
-│ chunk_0: kata 0-299           │ → embedding_0 → doc_id=11, chunk_index=0
-│ chunk_1: kata 250-549         │ → embedding_1 → doc_id=12, chunk_index=1
-│ chunk_2: kata 500-799         │ → embedding_2 → doc_id=13, chunk_index=2
-│ ...                           │
-│ chunk_13: kata 3000-3299      │ → embedding_13 → doc_id=24, chunk_index=13
-└───────────────────────────────┘
-        │
-        ▼
-Query "PHP itu apa?"
-→ Retrieve: chunk_7 (sim=0.64) ← berisi definisi PHP
-→ Bukan chunk_0 (sim=0.27) ← hanya berisi header dokumen
+        ▼ Query: "PHP itu apa?"
+Retrieve chunk_7 (sim=0.64) ← berisi definisi PHP di tengah dokumen
+vs sebelumnya chunk_0 (sim=0.27) ← hanya header
 ```
