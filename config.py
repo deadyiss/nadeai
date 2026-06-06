@@ -19,7 +19,10 @@ SECRET_KEY       = os.getenv("SECRET_KEY", "3f7a9c2e1b4d6f8a0e5c7b9d2f4a6e8c1b3d
 # ----------------------------
 # DATABASE
 # ----------------------------
-DATABASE_URL     = os.getenv("DATABASE_URL", f"sqlite:///{os.path.join(BASE_DIR, 'data', 'app.db')}")
+DATABASE_URL     = os.getenv(
+    "DATABASE_URL",
+    "sqlite:///" + os.path.join(BASE_DIR, "data", "app.db").replace("\\", "/")
+)
 
 # ----------------------------
 # FILE STORAGE
@@ -34,8 +37,8 @@ ALLOWED_EXTENSIONS  = {"pdf", "docx", "txt", "jpg", "jpeg", "png", "bmp", "tiff"
 # ----------------------------
 # AI MODELS
 # ----------------------------
-EMBEDDING_MODEL = "paraphrase-multilingual-MiniLM-L12-v2"
-EMBEDDING_DIM = 384
+EMBEDDING_MODEL  = os.getenv("EMBEDDING_MODEL", "paraphrase-multilingual-MiniLM-L12-v2")
+EMBEDDING_DIM    = 384
 LLM_PROVIDER     = os.getenv("LLM_PROVIDER", "groq")
 LLM_MODEL        = os.getenv("LLM_MODEL", "llama-3.1-8b-instant")
 GROQ_API_KEY     = os.getenv("GROQ_API_KEY", "")
@@ -56,6 +59,12 @@ TOP_K_DOCUMENTS          = int(os.getenv("TOP_K_DOCUMENTS", 5))
 SIMILARITY_MIN_THRESHOLD = float(os.getenv("SIMILARITY_MIN_THRESHOLD", 0.15))
 
 # ----------------------------
+# NLI
+# ----------------------------
+NLI_ENTAILMENT_THRESHOLD    = float(os.getenv("NLI_ENTAILMENT_THRESHOLD", 0.5))
+NLI_CONTRADICTION_THRESHOLD = float(os.getenv("NLI_CONTRADICTION_THRESHOLD", 0.5))
+
+# ----------------------------
 # SESSION
 # ----------------------------
 SESSION_EXPIRE_HOURS = int(os.getenv("SESSION_EXPIRE_HOURS", 24))
@@ -66,14 +75,9 @@ SESSION_EXPIRE_HOURS = int(os.getenv("SESSION_EXPIRE_HOURS", 24))
 LOG_FOLDER = os.path.join(BASE_DIR, "logs")
 LOG_LEVEL  = os.getenv("LOG_LEVEL", "INFO")
 
-NLI_ENTAILMENT_THRESHOLD = float(os.getenv("NLI_ENTAILMENT_THRESHOLD", 0.5))
-NLI_CONTRADICTION_THRESHOLD = float(os.getenv("NLI_CONTRADICTION_THRESHOLD", 0.5))
-
 # ----------------------------
 # ADMIN BOOTSTRAP
 # ----------------------------
 ADMIN_USERNAME = os.getenv("ADMIN_USERNAME", "admin")
 ADMIN_PASSWORD = os.getenv("ADMIN_PASSWORD", "admin123")
 ADMIN_EMAIL    = os.getenv("ADMIN_EMAIL", "admin@local")
-# --- Template context helpers ---
-# (digunakan di app.py inject ke template)

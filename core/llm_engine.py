@@ -1,8 +1,6 @@
 import time
 from typing import Optional
 
-import groq as groq_sdk
-
 import config
 from utils.logger import get_logger
 
@@ -13,12 +11,25 @@ class LLMEngine:
     def __init__(self):
         self.model = config.LLM_MODEL
         self.provider = config.LLM_PROVIDER
-        self.client = groq_sdk.Groq(api_key=config.GROQ_API_KEY)
+
+        if self.provider == "groq":
+            import groq as groq_sdk
+            self.client = groq_sdk.Groq(api_key=config.GROQ_API_KEY)
+        elif self.provider == "ollama":
+            import ollama as ollama_sdk
+            self.client = ollama_sdk.Client(host=config.OLLAMA_HOST)
+        else:
+            raise ValueError(f"Unknown LLM provider: {self.provider}")
+
         logger.info(f"LLM engine init: provider={self.provider} model={self.model}")
 
     def health_check(self) -> bool:
         try:
-            self.client.models.list()
+            if self.provider == "groq":
+                self.client.models.list()
+            elif self.provider == "ollama":
+                import ollama as ollama_sdk
+                ollama_sdk.Client(host=config.OLLAMA_HOST).list()
             return True
         except Exception as e:
             logger.error(f"LLM health check failed: {e}")
@@ -69,24 +80,42 @@ class LLMEngine:
     ) -> dict:
         system_msg, user_msg = prompt
         start = time.time()
+
         try:
-            response = self.client.chat.completions.create(
-                model=self.model,
-                messages=[
-                    {"role": "system", "content": system_msg},
-                    {"role": "user", "content": user_msg},
-                ],
-                temperature=temperature,
-                max_tokens=max_tokens,
-            )
-            elapsed = (time.time() - start) * 1000
-            text = response.choices[0].message.content.strip()
+            if self.provider == "groq":
+                response = self.client.chat.completions.create(
+                    model=self.model,
+                    messages=[
+                        {"role": "system", "content": system_msg},
+                        {"role": "user", "content": user_msg},
+                    ],
+                    temperature=temperature,
+                    max_tokens=max_tokens,
+                )
+                elapsed = (time.time() - start) * 1000
+                text = response.choices[0].message.content.strip()
+                tokens = response.usage.completion_tokens if response.usage else None
+
+            elif self.provider == "ollama":
+                response = self.client.chat(
+                    model=self.model,
+                    messages=[
+                        {"role": "system", "content": system_msg},
+                        {"role": "user", "content": user_msg},
+                    ],
+                    options={"temperature": temperature, "num_predict": max_tokens},
+                )
+                elapsed = (time.time() - start) * 1000
+                text = response["message"]["content"].strip()
+                tokens = response.get("eval_count")
+
             return {
                 "text": text,
                 "model": self.model,
                 "elapsed_ms": round(elapsed, 2),
-                "tokens_predicted": response.usage.completion_tokens if response.usage else None,
+                "tokens_predicted": tokens,
             }
+
         except Exception as e:
             elapsed = (time.time() - start) * 1000
             logger.error(f"LLM generate failed after {elapsed:.0f}ms: {e}")

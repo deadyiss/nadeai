@@ -1,23 +1,41 @@
-# Table of Contents
+# Web Framework
+flask
+flask-cors
+waitress
 
-* [README](README.md)
-* [Konsep Aplikasi](docs/concept.md)
+# LLM (Groq API)
+groq
 
-## Getting Started
-* [Prerequisites](docs/getting-started/prerequisites.md)
-* [Instalasi](docs/getting-started/installation.md)
-* [Cara Menjalankan](docs/getting-started/CARA-START.md)
+# LLM (Ollama)
+ollama
 
-## Arsitektur
-* [System Overview](docs/architecture/system-overview.md)
-* [Data Flow](docs/architecture/data-flow.md)
-* [Tech Stack](docs/architecture/tech-stack.md)
+# Embedding
+sentence-transformers
 
-## Algoritma
-* [Algorithms](docs/algorithms/algorithms.md)
+# NLI — Hallucination Detection
+transformers
+torch
 
-## Development
-* [Project Structure](docs/development/project-structure.md)
+# OCR
+rapidocr-onnxruntime
+pytesseract
+Pillow
+opencv-python
 
-## Catatan Pengerjaan
-* [Worklog](docs/Worklog.md)
+# Vector Operations
+numpy
+scipy
+
+# Document Processing
+pypdf
+python-docx
+
+# Database
+sqlalchemy==2.0.49
+
+# Auth & Utilities
+werkzeug
+python-dotenv
+colorama
+
+flask-wtf
